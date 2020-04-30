@@ -7,5 +7,10 @@
       "maxConcurrentRequests": 10,
       "dynamicThrottlesEnabled": false
     }
+  },
+  "logging": {
+    "logLevel": {
+      "default": "Trace" 
+    }
   }
  }

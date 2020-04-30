@@ -2,16 +2,12 @@ namespace YGI
 
 module Project =
 
-  open System
-  open System.Text.Json
   open Giraffe
   open Microsoft.AspNetCore.Http
   open FSharp.Control.Tasks.V2
   open GiraffeViewEngine
   open GiraffeViewEngine.Accessibility
-  open Microsoft.Extensions.Logging
   open YGI.Dto
-  open YGI.Storage
   open YGI.Events
 
 
@@ -98,34 +94,68 @@ module Project =
   let getHandler proj =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
-            let! summary = Storage.getProject proj ()
+          let logger = Logging.log <| ctx.GetLogger()
+          let! summary = Storage.getProject logger proj ()
 
-            match summary with 
-            | Some s -> 
-              let view = htmlView (projectView s)
-              return! view next ctx
-            | None -> 
-              let response = RequestErrors.NOT_FOUND "Page not found"
-              return! response next ctx            
+          match summary with 
+          | Some s -> 
+            let view = htmlView (projectView s)
+            return! view next ctx
+          | None -> 
+            let response = RequestErrors.NOT_FOUND "Page not found"
+            return! response next ctx            
         }
 
-  let createNewIssue projNum =
+  let getApiHandler proj =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        task {
+          let logger = Logging.log <| ctx.GetLogger()
+          let! summary = Storage.getProject logger proj ()
+
+          match summary with 
+          | Some s -> 
+            return! (Successful.OK s) next ctx 
+          | None -> 
+            let response = RequestErrors.NOT_FOUND "Page not found"
+            return! response next ctx            
+        }
+
+  //let createNewIssue projNum =
+  //  fun (next : HttpFunc) (ctx : HttpContext) ->
+  //    task {
+  //      let logger = Logging.log <| ctx.GetLogger()
+  //      let! dto = ctx.BindFormAsync<NewIssueDto>()
+
+  //      let taskResult = taskResult {
+  //        let event = AddNewIssueEvent.create dto ""
+  //        return! Api.newIssueApi logger projNum event
+  //      }
+
+  //      let response = taskResult |> Task.map (fun r -> 
+  //        match r with
+  //        | Ok _ -> redirectTo false "/" next ctx
+  //        | Error err -> failwithf "createNewIssue failed: %s" err
+  //      )
+
+  //      return! redirectTo false "/" next ctx
+  //    }
+
+  let createNewIssue projNum : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
-        let logger = ctx.GetLogger()
-        let! dto = ctx.BindFormAsync<NewIssueDto>()
+        let logger = Logging.log <| ctx.GetLogger()
+        let! dto = ctx.BindJsonAsync<NewIssueDto>()
 
-        let taskResult = taskResult {
+        let! taskResult = taskResult {
           let event = AddNewIssueEvent.create dto ""
-          return! Api.newIssueApi logger projNum event
+          return! Api.CreateNewIssue logger projNum event
         }
 
-        let response = taskResult |> Task.map (fun r -> 
-          match r with
-          | Ok _ -> redirectTo false "/" next ctx
-          | Error err -> failwithf "createNewIssue failed: %s" err
-        )
+        let response =
+          match taskResult with
+          | Ok _ -> (Successful.OK "") next ctx
+          | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
 
-        return! redirectTo false "/" next ctx
+        return! response
       }
   

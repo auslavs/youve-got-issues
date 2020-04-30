@@ -5,6 +5,7 @@ open Giraffe
 
 type WebJobsExtensionStartup () =
   inherit FunctionsStartup ()
+
   override __.Configure(builder: IFunctionsHostBuilder) =
     builder.Services.AddGiraffe() |> ignore
 

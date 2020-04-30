@@ -12,7 +12,7 @@ module App =
   open FSharp.Control.Tasks.V2
   open Microsoft.Extensions.Logging
 
-  do Storage.initProjectSummary () |> ignore
+  do Storage.initProjectSummary () |> Task.FromResult |> ignore
 
   let loggingHandler: HttpHandler =
     fun next ctx -> task {
@@ -22,15 +22,23 @@ module App =
       return! Successful.OK "ok" next ctx
     }
 
+  let indexPage   : HttpHandler = route "/" >=> htmlFile "index.html"
+  let projectPage : HttpHandler = routex "\/P\d{5}" >=> htmlFile "project.html"
+  let issuesPage  : HttpHandler = routex "\/P\d{5}\/[0-9]+" >=> htmlFile "issue.html"
+  let issuesApi   : HttpHandler = routex "\/api\/(P\d{5})\/([0-9]+)" 
+    
+
   let app : HttpHandler =
 
     choose [
-      GET  >=> route "/" >=> Index.getHandler
-      POST >=> route "/" >=> Index.createNewProject
-      GET  >=> routef "/%s" (fun proj -> Project.getHandler proj)
-      POST >=> routef "/%s" (fun proj -> Project.createNewIssue proj)
-      GET  >=> route "/demo" >=> htmlFile "index.html"
-      GET  >=> route "/api/demo" >=> htmlFile "index.html"
+      //GET  >=> indexPage
+      //GET  >=> projectPage
+      //GET  >=> issuesPage 
+      GET  >=> route "/api/summary" >=> Index.getApiHandler
+      GET  >=> routef "/api/%s" (fun proj -> Project.getApiHandler proj)
+      GET  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.getIssueDetail ("P" + proj) id)
+      POST >=> routef "/api/P%s" (fun _ -> Index.createNewProject)
+      POST >=> routef "/api/P%s/issues" (fun proj -> Project.createNewIssue ("P" + proj))
     ]
 
   let errorHandler (ex : exn) (logger : ILogger) =

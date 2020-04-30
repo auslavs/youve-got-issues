@@ -1,0 +1,33 @@
+﻿{
+  "$schema": "http://json.schemastore.org/proxies",
+  "proxies": {
+    "index": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/"
+      },
+      "backendUri": "https://funcwithauth.blob.core.windows.net/site/index.html"
+    },
+    "project": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/P{number}"
+      },
+      "backendUri": "https://funcwithauth.blob.core.windows.net/site/project.html"
+    },
+    "issue": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/P{proj}/{issue}"
+      },
+      "backendUri": "https://funcwithauth.blob.core.windows.net/site/issue.html"
+    },
+    "assets": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/assets/{*path}"
+      },
+      "backendUri": "https://funcwithauth.blob.core.windows.net/site/assets/{path}"
+    }
+  }
+}

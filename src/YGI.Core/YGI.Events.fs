@@ -2,7 +2,7 @@
 
   open YGI.Common
   open YGI.Dto
-  open Microsoft.WindowsAzure.Storage.Table
+  open Microsoft.Azure.Cosmos.Table
 
   type YgiEvent =
     | AddNewProject of YgiEvent<NewProjectDto>

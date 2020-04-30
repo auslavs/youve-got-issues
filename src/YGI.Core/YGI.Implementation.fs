@@ -1,28 +1,28 @@
 ﻿module internal YGI.Implementation
 
-  open Microsoft.Extensions.Logging
   open YGI.Common
   open YGI.Dto
+  open YGI.Logging
   open System.Threading.Tasks
 
-  type LogEvent<'TEvent> = ILogger -> YgiEvent<'TEvent> -> unit -> 'TEvent
-  type StoreState<'TState> = ILogger -> 'TState -> Task<unit>
-  type LoadCurrentState<'TState> = ILogger -> string -> unit -> Task<'TState>
+  type LogEvent<'TEvent> = Logger -> YgiEvent<'TEvent> -> unit -> 'TEvent
+  type StoreState<'TState> = Logger -> 'TState -> Task<unit>
+  type GetState<'TState> = Logger -> string -> Task<'TState>
+  type UpdateState<'TState> = Logger -> 'TState -> string -> Task<unit>
+  type LeaseCurrentState<'TState> = Logger -> string -> unit -> Task<'TState * string>
   type ApplyEvent<'TState,'TEvent> = 'TState -> 'TEvent -> Result<'TState,string>
   
 
   type LogNewProjectEvent = LogEvent<NewProjectDto>
   type StoreProjectState = StoreState<ProjectState>
+  type UpdateProjectState = UpdateState<ProjectState>
   type CreateNewProject = NewProjectDto -> Result<ProjectState, string>
-  type UpdateProjectSummary = ILogger -> ProjectState -> TaskResult<unit, string>
+  type UpdateProjectSummary = Logger -> ProjectState -> TaskResult<unit, string>
   type AddNewProject = YgiEvent<NewProjectDto> -> TaskResult<ProjectState,string>
 
-  //type LoadCurrentState<'TState> = unit -> 'TState
-  //type ApplyEvent<'TEvent,'TState> = 'TState -> 'TEvent -> Result<'TState, string>
-  //type StoreState<'TState> = 'TState -> unit -> Task<unit>
 
   let addNewProjectWorkflow
-    (logger : ILogger)
+    (logger : Logger)
     (logEvent:LogNewProjectEvent)
     (createNewProject : CreateNewProject)
     (storeNewProject : StoreProjectState)
@@ -32,7 +32,7 @@
     fun event -> 
       taskResult {
 
-        logger.LogInformation <| sprintf "Recieved Event:\r\n%A" event
+        logger Info <| sprintf "Recieved Event:\r\n%A" event
 
         let eventBody = logEvent logger event ()
         let! newProject = createNewProject eventBody |> TaskResult.ofResult
@@ -44,31 +44,62 @@
 
 
   type LogNewIssueEvent = LogEvent<NewIssueDto>
-  type GetProjectState = ILogger -> string -> Task<unit>
-  type LoadProjectState = LoadCurrentState<ProjectStateDto>
+  type LeaseProjectState = LeaseCurrentState<ProjectStateDto>
   type AddIssueToProject = ApplyEvent<ProjectState,NewIssueDto>
 
 
   let addNewProjectIssueWorkflow
-    (logger : ILogger)
+    (logger : Logger)
     (logEvent:LogNewIssueEvent)
-    (loadProjectState:LoadProjectState)
+    (leaseProjectState:LeaseProjectState)
     (addIssueToProject: AddIssueToProject)
-    (storeNewState:StoreProjectState)
+    (updateProjectState:UpdateProjectState)
     (updateProjectSummary: UpdateProjectSummary)
     =
 
     fun projNum event -> 
       taskResult {
 
-        logger.LogInformation <| sprintf "Recieved Event:\r\n%A" event
+        logger Info <| sprintf "Recieved Event:\r\n%A" event
 
-        let  eventBody = logEvent logger event ()
-        let! currentStateDto = loadProjectState logger projNum ()|> TaskResult.ofTask
-        let! currentState = currentStateDto |> ProjectStateDto.toProjectState |> TaskResult.ofResult
+        let eventBody = logEvent logger event ()
+        let! dto, leaseId = leaseProjectState logger projNum () |> TaskResult.ofTask
+        let! currentState = dto |> ProjectStateDto.toProjectState |> TaskResult.ofResult
         let! newState = addIssueToProject currentState eventBody |> TaskResult.ofResult
-        do!  storeNewState logger newState |> TaskResult.ofTask
+        do! updateProjectState logger newState leaseId |> TaskResult.ofTask
         do! updateProjectSummary logger newState
 
         return newState
+      }
+
+  type GetProjectState = TaskResult<ProjectStateDto,string>
+  type CreateIssueDetailViewDto = ProjectStateDto -> Result<IssueDetailViewDto,string>
+
+  let getIssueDetailWorkFlow 
+    (logger : Logger)
+    (getProjectState:GetProjectState) 
+    (createIssueDetail:CreateIssueDetailViewDto)
+    =
+    fun projNum issueNum ->
+      taskResult {
+
+        logger Info <| sprintf "Retrieving Project Issue,\r\nProject:%s, Issue No.%i" projNum issueNum
+
+        let! dtoOpt = getProjectState |> TaskResult.ofTask
+
+        let result = 
+          match dtoOpt with
+          | Result.Error _ -> 
+
+            let logstr = 
+              "Failed to retrieve the project state when creating the Issue Detail\r\n" +
+              sprintf "Project:%s, Issue No.%i" projNum issueNum
+
+            logger Warning <| logstr
+
+            Result.Error logstr
+
+          | Result.Ok dto -> dto |> createIssueDetail
+
+        return! result |> TaskResult.ofResult
       }

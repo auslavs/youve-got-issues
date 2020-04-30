@@ -1,0 +1,37 @@
+﻿{
+  "$schema": "http://json.schemastore.org/proxies",
+  "proxies": {
+    "index": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/"
+      },
+      "backendUri": "%StaticSite%/index.html%Sas%",
+      "debug": false
+    },
+    "project": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/P{number}"
+      },
+      "backendUri": "%StaticSite%/project.html%Sas%",
+      "debug": false
+    },
+    "issue": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/P{proj}/{issue}"
+      },
+      "backendUri": "%StaticSite%/issue.html%Sas%",
+      "debug": false
+    },
+    "assets": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/assets/{*path}"
+      },
+      "backendUri": "%StaticSite%/assets/{path}%Sas%",
+      "debug": false
+    }
+  }
+}

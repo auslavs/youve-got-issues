@@ -112,7 +112,7 @@
       /// Create a new issue and append it to the issues list
       let newIssueNum = getNextIssueNumber state.Issues  
       let newIssue = issue |> Issue.create newIssueNum
-      let issues = (newIssue::state.Issues)
+      let issues = (newIssue::state.Issues) |> List.sortBy (fun i -> i.ItemNo)
 
       /// Recalculate the types lists
       let areaLst    = issues |> getAreaList
@@ -143,10 +143,21 @@
         LastChanged = DateTime.Now
       }
 
-    let addProject (summary:Summary) projSummary = 
-      
+    let addOrReplaceProject (summary:Summary) projSummary = 
+
+      let addOrReplace (lst:ProjectSummary list) (proj:ProjectSummary) =
+        let rec search input acc found = 
+          match input with
+          | [] -> if found then acc else (proj::acc)
+          | x::xs ->
+            if proj.ProjectNumber = x.ProjectNumber then 
+              search xs (proj::acc) true
+            else
+              search xs (x::acc) found
+        search lst [] false
+
       let projList = 
-        projSummary::summary.ProjList 
+        addOrReplace summary.ProjList projSummary
         |> List.sortByDescending (fun x -> x.ProjectNumber)
 
       {summary with ProjList = projList}

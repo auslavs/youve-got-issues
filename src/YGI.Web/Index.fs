@@ -23,7 +23,7 @@ module Index =
   
       let tableRow (i:ProjectSummaryDto) = 
         tr [] [ 
-          td [] [ str i.ProjectNumber ]
+          td [] [ a [ _href i.ProjectNumber] [ str i.ProjectNumber ] ]
           td [] [ str i.ProjectName ]
           td [] [ str i.OpenIssues ]
         ]
@@ -77,30 +77,54 @@ module Index =
   let getHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
-        let logger = ctx.GetLogger()
-        let! summary = Storage.getProjectSummary logger ()
+        let! summary = Storage.getProjectSummary ()
         let view = htmlView (indexView summary)
         return! view next ctx
       }
 
+  let getApiHandler =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+      task {
+        let! summary = Storage.getProjectSummary ()
+        return! (Successful.OK summary) next ctx 
+      }
+
+  //let createNewProject =
+  //  fun (next : HttpFunc) (ctx : HttpContext) ->
+  //    task {
+  //      let logger = Logging.log <| ctx.GetLogger()
+  //      let! dto = ctx.BindFormAsync<NewProjectDto>()
+
+  //      let taskResult = taskResult {
+  //        let event = AddNewProjectEvent.create dto ""
+  //        return! Api.CreateNewProject logger event
+  //      }
+
+  //      let response = taskResult |> Task.map (fun r -> 
+  //        match r with
+  //        | Ok _ -> redirectTo false "/" next ctx
+  //        | Error err -> failwithf "createNewProject failed: %s" err
+  //      )
+
+  //      return! redirectTo false "/" next ctx
+  //    }
 
   let createNewProject =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
-        let logger = ctx.GetLogger()
-        let! dto = ctx.BindFormAsync<NewProjectDto>()
+        let logger = Logging.log <| ctx.GetLogger()
+        let! dto = ctx.BindJsonAsync<NewProjectDto>()
 
-        let taskResult = taskResult {
+        let! taskResult = taskResult {
           let event = AddNewProjectEvent.create dto ""
-          return! Api.newProjectApi logger event
+          return! Api.CreateNewProject logger event
         }
 
-        let response = taskResult |> Task.map (fun r -> 
-          match r with
-          | Ok _ -> redirectTo false "/" next ctx
-          | Error err -> failwithf "createNewProject failed: %s" err
-        )
+        let response =
+          match taskResult with
+          | Ok _ -> (Successful.OK "") next ctx
+          | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
 
-        return! redirectTo false "/" next ctx
+        return! response
       }
   

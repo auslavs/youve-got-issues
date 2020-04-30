@@ -103,6 +103,7 @@
       Vid         = i.Vid
     }
 
+
   [<CLIMutable>]
   type NewProjectDto = {
     ProjectNumber  : string
@@ -156,7 +157,11 @@
         let! areaLst    = string50ArrayHelper "AreaList" dto.AreaList
         let! equipTypes = string50ArrayHelper "EquipmentTypes" dto.EquipmentTypes
         let! issueTypes = string50ArrayHelper "IssueTypes" dto.IssueTypes
-        let! issues     = dto.Issues |> Array.map IssueDto.toIssue |> Array.toList |> Result.sequence
+        let! issues     = dto.Issues
+                          |> Array.sortBy(fun i -> i.ItemNo)
+                          |> Array.map IssueDto.toIssue 
+                          |> Array.toList 
+                          |> Result.sequence
 
         return
           {
@@ -183,6 +188,36 @@
         Vid            = state.Vid
       
       }
+
+  [<CLIMutable>]
+  type IssueDetailViewDto = {
+    ProjectNumber  : string
+    ProjectName    : string
+    AreaList       : string []
+    EquipmentTypes : string [] 
+    IssueTypes     : string [] 
+    Issue          : IssueDto
+  }
+
+  module internal IssueDetailViewDto =
+    let fromProjectStateDto issueNum (state:ProjectStateDto)  : Result<IssueDetailViewDto,string> = 
+
+      let issueOpt = state.Issues |> Array.tryFind (fun i -> i.ItemNo = issueNum)
+
+      match issueOpt with
+      | None -> Result.Error <| sprintf "Could not find Issue: %i" issueNum
+      | Some issue -> 
+        let view = 
+          {
+            ProjectNumber  = state.ProjectNumber
+            ProjectName    = state.ProjectName
+            AreaList       = state.AreaList
+            EquipmentTypes = state.EquipmentTypes
+            IssueTypes     = state.IssueTypes
+            Issue          = issue
+          }
+        Result.Ok view
+    
 
   [<CLIMutable>]
   type ProjectSummaryDto = {
