@@ -9,7 +9,8 @@
     Area          : string
     Equipment     : string
     IssueType     : string
-    Issue         : string
+    Title         : string
+    Description   : string
     RaisedBy      : string
   }
 
@@ -17,17 +18,19 @@
 
     let toUnvalidatedIssue (dto:NewIssueDto) =
       result {
-        let! area     = dto.Area      |> String50.create  "Area"
-        let! equip    = dto.Equipment |> String50.create  "Equipment"
-        let! iType    = dto.IssueType |> String50.create  "Type"
-        let! issue    = dto.Issue     |> String500.create "Issue"
-        let! raisedBy = dto.RaisedBy  |> String100.create "RaisedBy"
+        let! area        = dto.Area        |> String50.create  "Area"
+        let! equip       = dto.Equipment   |> String50.create  "Equipment"
+        let! iType       = dto.IssueType   |> String50.create  "Type"
+        let! title       = dto.Title       |> String100.create "Title"
+        let! description = dto.Description |> String500.create "Description"
+        let! raisedBy    = dto.RaisedBy    |> String100.create "RaisedBy"
 
         let domainObj : UnvalidatedNewIssue = {
             Area        = area
             Equipment   = equip
             IssueType   = iType
-            Issue       = issue
+            Title       = title
+            Description = description
             RaisedBy    = raisedBy
           } 
         
@@ -41,7 +44,8 @@
     Area        : string
     Equipment   : string
     IssueType   : string
-    Issue       : string
+    Title       : string
+    Description : string
     Comments    : string []
     Resolution  : string
     RaisedBy    : string
@@ -60,14 +64,15 @@
         let string500ArrayHelper fieldName arr = 
           arr |> Array.map (String500.create fieldName) |> Array.toList |> Result.sequence
 
-        let! area       = String50.create "Area" dto.Area
-        let! equip      = String50.create "Equipment" dto.Equipment
-        let! issueType  = String50.create "IssueType" dto.IssueType
-        let! issue      = String500.create "Issue" dto.Issue
-        let! comments   = string500ArrayHelper "Comments" dto.Comments
-        let! resolution = String500.createOption "Resolution" dto.Resolution
-        let! raisedBy   = String100.create "RaisedBy" dto.RaisedBy
-        let! status     = Status.fromStr dto.Status
+        let! area        = String50.create "Area" dto.Area
+        let! equip       = String50.create "Equipment" dto.Equipment
+        let! issueType   = String50.create "IssueType" dto.IssueType
+        let! title       = String100.create "Title" dto.Title
+        let! description = String500.create "Description" dto.Description
+        let! comments    = string500ArrayHelper "Comments" dto.Comments
+        let! resolution  = String500.createOption "Resolution" dto.Resolution
+        let! raisedBy    = String100.create "RaisedBy" dto.RaisedBy
+        let! status      = Status.fromStr dto.Status
 
         return 
           {
@@ -75,7 +80,8 @@
             Area        = area
             Equipment   = equip
             IssueType   = issueType
-            Issue       = issue
+            Title  = title
+            Description = description
             Comments    = comments
             Resolution  = resolution
             RaisedBy    = raisedBy
@@ -92,7 +98,8 @@
       Area        = String50.value i.Area
       Equipment   = String50.value i.Equipment
       IssueType   = String50.value i.IssueType
-      Issue       = String500.value i.Issue
+      Title       = String100.value i.Title
+      Description = String500.value i.Description
       Comments    = i.Comments |> List.map String500.value |> List.toArray
       Resolution  = i.Resolution |> Option.map String500.value |> Option.defaultValue ""
       RaisedBy    = String100.value i.RaisedBy

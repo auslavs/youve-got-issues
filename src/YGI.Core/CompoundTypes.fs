@@ -11,7 +11,8 @@
     Area        : String50
     Equipment   : String50
     IssueType   : String50
-    Issue       : String500
+    Title       : String100
+    Description : String500
     RaisedBy    : String100
   }
 
@@ -20,7 +21,8 @@
     Area        : String50
     Equipment   : String50
     IssueType   : String50
-    Issue       : String500
+    Title       : String100
+    Description : String500
     Comments    : String500 list
     Resolution  : String500 option
     RaisedBy    : String100
@@ -60,7 +62,8 @@
         Area        = uni.Area
         Equipment   = uni.Equipment
         IssueType   = uni.IssueType
-        Issue       = uni.Issue
+        Title       = uni.Title
+        Description = uni.Description
         Comments    = []
         Resolution  = None
         RaisedBy    = uni.RaisedBy

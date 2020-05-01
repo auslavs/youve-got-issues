@@ -1,19 +1,13 @@
-﻿<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
   <title>You&#39;ve Got Issues</title>
-  <link rel="stylesheet" type="text/css"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-    crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
-    crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.11" crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/moment" crossorigin="anonymous"></script>
-  <script src="https://kit.fontawesome.com/e2b4ceabac.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -24,11 +18,11 @@
         class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
-        
+
       </ul>
     </div>
   </nav>
-  
+
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -36,10 +30,11 @@
     </ol>
   </nav>
 
-  <div id="issues-list" class="container-fluid  col-sm-8" >
+  <div id="issues-list" class="container-fluid">
     <p></p>
     <div class="card">
-      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new-issue-modal">+ Add New Issue</button>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new-issue-modal">+ Add New
+        Issue</button>
     </div>
 
     <p></p>
@@ -47,30 +42,35 @@
     <table class="table table-hover table-sm">
       <thead>
         <tr>
-            <th scope="col" class="" style="width: 30px;">#</th>
-            <th scope="col" class="" style="width: 130px;">Area</th>
-            <th scope="col" class="d-none d-md-table-cell" style="width: 130px;">Equipment</th>
-            <th scope="col" class="d-none d-md-table-cell" style="width: 130px;">Issue Type</th>
-            <th scope="col" >Issue</th>
-            <!-- <th scope="col" class="d-none d-xl-table-cell" style="width: 200px;" ></th> -->
-            <th scope="col" class="d-none d-md-table-cell" style="width: 200px;" ></th>
+          <th scope="col" class="" style="width: 30px;">#</th>
+          <th scope="col" class="" style="width: 130px;">Area</th>
+          <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Equipment</th>
+          <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Issue Type</th>
+          <th scope="col">Issue</th>
+          <th scope="col" class="d-none d-md-table-cell" style="width: 200px;"></th>
         </tr>
-    </thead>
+      </thead>
       <tbody>
-        <tr v-for="issue in issues" :key="issue.ItemNo" >
+        <tr v-for="issue in issues" :key="issue.ItemNo">
           <td scope="row" class=""><a v-bind:href="path + '/' + issue.itemNo">{{ issue.itemNo }}</a></td>
           <td scope="row" class="">{{ issue.area }}</td>
-          <td scope="row" class="d-none d-md-table-cell">{{ issue.equipment }}</td>
-          <td scope="row" class="d-none d-md-table-cell">{{ issue.issueType }}</td>
-          <td scope="row" class="">{{ issue.issue }}</td>
+          <td scope="row" class="d-none d-lg-table-cell">{{ issue.equipment }}</td>
+          <td scope="row" class="d-none d-lg-table-cell">{{ issue.issueType }}</td>
+          <td scope="row" class="d-lg-none">
+            {{ issue.title }}
+          </td>
+          <td scope="row" class="d-none d-lg-table-cell">
+            <h5>{{ issue.title }}</h5>
+            {{ issue.description }}
+          </td>
           <!-- <td class="d-none d-md-block d-lg-block d-xl-table-cell" >Raised By: {{ issue.raisedBy }}</td> -->
-          <td class="d-none d-md-block" >Raised By: {{ issue.raisedBy }}</td>
-          <td class="d-none d-md-block" >Raised: {{ issue.raised | formatDate }}</td>
-          <td class="d-none d-md-block" >Last Changed: {{ issue.lastChanged | formatDate }}</td>
-          <td class="d-none d-md-block" >Status: {{ issue.status }}</td>
-          <td class="d-none d-md-block" >
-              <i class="far fa-comments"></i>
-              <i class="fas fa-paperclip"></i>
+          <td class="d-none d-md-block">Raised By: {{ issue.raisedBy }}</td>
+          <td class="d-none d-md-block">Raised: {{ issue.raised | formatDate }}</td>
+          <td class="d-none d-md-block">Last Changed: {{ issue.lastChanged | formatDate }}</td>
+          <td class="d-none d-md-block">Status: {{ issue.status }}</td>
+          <td class="d-none d-md-block">
+            <i class="far fa-comments"></i>
+            <i class="fas fa-paperclip"></i>
           </td>
         </tr>
       </tbody>
@@ -89,8 +89,20 @@
             <div class="modal-body">
 
               <div class="form-group">
+                <label for="title">Title</label>
+                <input id="title" name="Title" v-model="newIssue.Title" class="form-control" type="text" required />
+              </div>
+
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="Description" v-model="newIssue.Description" class="form-control" rows="5" maxlength="500"
+                  required></textarea>
+              </div>
+
+              <div class="form-group">
                 <label for="area">Area</label>
-                <input id="area" name="Area" v-model="newIssue.Area" class="form-control" list="area-lst" type="text" required>
+                <input id="area" name="Area" v-model="newIssue.Area" class="form-control" list="area-lst" type="text"
+                  required>
                 <datalist id="area-lst">
                   <option v-for="area in areaList">
                     {{ area }}
@@ -100,7 +112,8 @@
 
               <div class="form-group">
                 <label for="equipment">Equipment</label>
-                <input id="equipment" name="Equipment" v-model="newIssue.Equipment" class="form-control" list="equipment-lst" type="text" required />
+                <input id="equipment" name="Equipment" v-model="newIssue.Equipment" class="form-control"
+                  list="equipment-lst" type="text" required />
                 <datalist id="equipment-lst">
                   <option v-for="equipment in equipmentTypes">
                     {{ equipment }}
@@ -119,13 +132,9 @@
               </div>
 
               <div class="form-group">
-                <label for="issue">Issue</label>
-                <textarea id="issue" name="Issue" v-model="newIssue.Issue" class="form-control" rows="5" maxlength="500" required></textarea>
-              </div>
-
-              <div class="form-group">
                 <label for="raised-by">Raised By</label>
-                <input id="raised-by" name="RaisedBy" v-model="newIssue.RaisedBy" class="form-control" type="text" required />
+                <input id="raised-by" name="RaisedBy" v-model="newIssue.RaisedBy" class="form-control" type="text"
+                  required />
               </div>
             </div>
 
@@ -141,76 +150,25 @@
       </div>
     </div>
   </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.11" crossorigin="anonymous"></script> -->
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/moment" crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://kit.fontawesome.com/e2b4ceabac.js"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="assets/js/project.js" crossorigin="anonymous"></script>
 </body>
 
 </html>
-
-<script type="application/javascript">
-
-  Vue.config.devtools = true;
-
-  $('#current-page').text(window.location.pathname.substring(1)),
-
-  Vue.filter('formatDate', function (value) {
-    if (value) {
-      return moment(String(value)).format('DD/MM/YYYY')
-    }
-  });
-
-  new Vue({
-    el: '#issues-list',
-    data() {
-      return {
-        model:          null,
-        issues:         null,
-        issueTypes:     null,
-        equipmentTypes: null,
-        areaList:       null,
-        path:           window.location.pathname,
-        newIssue: {
-          Area:      null,
-          Equipment: null,
-          IssueType: null,
-          Issue:     null,
-          RaisedBy:  null
-        }
-      }
-    },
-    methods: {
-      loadIssues: function () {
-        axios
-          .get('/api' + this.path)
-          .then(response => (
-            this.model = response.data,
-            this.issues = response.data.issues,
-            this.issueTypes = response.data.issueTypes,
-            this.equipmentTypes = response.data.equipmentTypes,
-            this.areaList = response.data.areaList
-          ))
-      },
-      submitIssue: function () {
-        axios
-          .post('/api' + this.path + '/issues', this.newIssue)
-          .then(res => 
-            this.loadIssues(),
-            $('#new-issue-modal').modal('hide'),
-            this.newIssue = {
-                Area:      null,
-                Equipment: null,
-                IssueType: null,
-                Issue:     null,
-                RaisedBy:  null
-              }
-            )
-          .catch(function (error) {
-            console.log(error)
-          })
-      }
-    },
-    mounted() {
-      this.loadIssues()
-    }
-  })
-
-
-</script>
