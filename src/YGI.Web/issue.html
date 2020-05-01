@@ -1,22 +1,16 @@
-﻿<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <title>You&#39;ve Got Issues</title>
-  <link rel="stylesheet" type="text/css"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-    crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
-    crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.11" crossorigin="anonymous"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/moment" crossorigin="anonymous"></script>
-  <script src="https://kit.fontawesome.com/e2b4ceabac.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
+
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="/">You&#39;ve Got Issues</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -32,118 +26,72 @@
   <nav id="breadcrumb" aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
-      <li class="breadcrumb-item" v-for="crumb in breadcrumb" v-if="!crumb.active" :key="breadcrumb"><a
+      <li class="breadcrumb-item" v-for="crumb in breadcrumb" v-if="!crumb.active" :key="crumb.text"><a
           v-bind:href="crumb.link">{{crumb.text}}</a></li>
       <li class="breadcrumb-item active" aria-current="page" v-for="crumb in breadcrumb" v-if="crumb.active"
-        :key="breadcrumb">{{crumb.text}}</li>
+        :key="crumb.text">{{crumb.text}}</li>
     </ol>
   </nav>
 
-  <div id="issues-detail" class="container-fluid col-sm-8">
+  <div id="issues-detail" class="container-fluid">
 
     <div>
-      <h4>{{String(issue.itemNo)}} - {{issue.issueType}}</h4>
-      <hr />
-      <dl class="row">
-        <dt class="col-sm-3">Area</dt><dd class="col-sm-9">{{issue.area}}</dd>
-        <dt class="col-sm-3">Equipment</dt><dd class="col-sm-9">{{issue.equipment}}</dd>
-        <dt class="col-sm-3">Issue Type</dt><dd class="col-sm-9">{{issue.issueType}}</dd>
-        <dt class="col-sm-3">Issue</dt><dd class="col-sm-9">{{issue.issue}}</dd>
-        <dt class="col-sm-3">Raised By</dt><dd class="col-sm-9">{{issue.raisedBy}}</dd>
-        <dt class="col-sm-3">Raised</dt><dd class="col-sm-9">{{issue.raised | formatDate}}</dd>
-        <dt class="col-sm-3">Last Changed</dt><dd class="col-sm-9">{{issue.lastChanged | formatDate}}</dd>
-        <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{issue.status}}</dd>
-      </dl>
+
+      <div class="card" style="max-width: 48rem;">
+
+        
+
+
+        <div class="card-body">
+
+          <h4 class="card-title">{{String(issue.itemNo)}} - {{issue.title}}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              <span>Raised By: {{issue.raisedBy}} on the </span>
+              <time v-bind:datetime="issue.raised">{{issue.raised | formatDate}}</time>
+            </h6>
+          <hr />
+          <p>{{issue.description}}</p>
+          <br/>
+          <br/>
+
+          <dl class="row">
+            <dt class="col-lg-3">Area</dt>
+            <dd class="col-lg-9">{{issue.area}}</dd>
+            <dt class="col-lg-3">Equipment</dt>
+            <dd class="col-lg-9">{{issue.equipment}}</dd>
+            <dt class="col-lg-3">Issue Type</dt>
+            <dd class="col-lg-9">{{issue.issueType}}</dd>
+            <dt class="col-lg-3">Last Changed</dt>
+            <dd class="col-lg-9">{{issue.lastChanged | formatDate}}</dd>
+            <dt class="col-lg-3">Status</dt>
+            <dd class="col-lg-9">{{issue.status}}</dd>
+          </dl>
+
+        </div>
+
+      </div>
+
     </div>
 
   </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.11" crossorigin="anonymous"></script> -->
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/moment" crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://kit.fontawesome.com/e2b4ceabac.js"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="../assets/js/issue.js" crossorigin="anonymous"></script>
 </body>
 
 </html>
-
-<script type="application/javascript">
-
-  Vue.config.devtools = true;
-
-  $('#project').text(window.location.pathname.substring(1)),
-
-    Vue.filter('formatDate', function (value) {
-      if (value) {
-        return moment(String(value)).format('DD/MM/YYYY')
-      }
-    });
-
-  new Vue({
-    el: '#breadcrumb',
-    data() {
-      return {
-        breadcrumb: null,
-      }
-    },
-    methods: {
-      buildBreadcrumbPath: function () {
-
-        var path = window.location.pathname.split("/")
-        path.shift();
-
-        var link = "/"
-        var crumbs = new Array();
-        for (var i = 0; i < path.length; i++) {
-          link += path[i]
-          let active = (i + 1) === path.length ? true : false;
-          var crumb = { link: link, text: path[i], active: active }
-          crumbs.push(crumb);
-          link += "/"
-        }
-        this.breadcrumb = crumbs
-      }
-    },
-    mounted() {
-      this.buildBreadcrumbPath()
-    }
-  })
-
-  new Vue({
-    el: '#issues-detail',
-    data() {
-      return {
-        model:          null,
-        issueTypes:     null,
-        equipmentTypes: null,
-        areaList:       null,
-        path:           window.location.pathname,
-        issue:  
-        {
-          area:         null,
-          Equipment:    null,
-          issueType:    null,
-          issue:        null,
-          raisedBy:     null,
-          raised:       null,
-          lastChanged:  null,
-          status:       null,
-          comments:     null,
-          vid:          null
-        },
-      }
-    },
-    methods: {
-      loadIssue: function () {
-        axios
-          .get('/api' + this.path)
-          .then(response => (
-            this.model = response.data,
-            this.issue = response.data.issue,
-            this.issueTypes = response.data.issueTypes,
-            this.equipmentTypes = response.data.equipmentTypes,
-            this.areaList = response.data.areaList
-          ))
-      }
-    },
-    mounted() {
-      this.loadIssue()
-    }
-  })
-
-
-</script>
