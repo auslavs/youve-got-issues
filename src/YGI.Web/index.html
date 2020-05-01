@@ -1,112 +1,123 @@
 ﻿<!doctype html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/css/index.css" >
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets/css/index.css">
+  <title>You&#39;ve Got Issues</title>
+</head>
 
-    <title>You&#39;ve Got Issues</title>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">You&#39;ve Got Issues</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span
-          class="navbar-toggler-icon"></span></button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          
-        </ul>
-      </div>
-    </nav>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">You&#39;ve Got Issues</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span
+        class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <p></p>
+    <div class="card">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new-project-modal">+ Add New
+        Project</button>
+    </div>
+    <p></p>
 
     <div class="container-fluid">
-      <p></p>
-      <div class="card">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new-project-modal">+ Add New Project</button>
-      </div>
-      <p></p>
-  
-      <div class="container-fluid">
-        <div id="project-list">
-          <div class="property-card float-left" v-for="project in projects" :key="project.projectNumber">
-            <a v-bind:href="project.projectNumber">
-              <div class="property-image">
-                <div class="property-image-shadow"></div>
-                <div class="property-image-title">
-                  <h5>{{project.projectName}}</h5>
+
+      <div id="project-list">
+        <div class="float_center">
+          <ul class="child">
+            <li>
+              <div class="property-card" v-for="project in projects" :key="project.projectNumber">
+                <a v-bind:href="project.projectNumber">
+                  <div class="property-image">
+                    <div class="property-image-shadow"></div>
+                    <div class="property-image-title">
+                      <h5>{{project.projectName}}</h5>
+                    </div>
+                  </div>
+                </a>
+                <div class="property-description">
+                  <h5>{{project.projectNumber}}</h5>
+                  <p>{{project.projectName}}</p>
+                </div>
+                <div class="property-social-icons">
+                  <ul>
+                    <li>
+                      <span><i class="fas fa-flag"></i></span> {{project.openIssues}} </li>
+                  </ul>
                 </div>
               </div>
-            </a>
-            <div class="property-description">
-              <h5>{{project.projectNumber}}</h5>
-              <p>{{project.projectName}}</p>
-            </div>
-            
-            <!-- <ul>
-              <li><i class="fas fa-flag"></i></li>
-            </ul> -->
-            <a href="#">
-              <div class="property-social-icons">
-                <ul>
-                  <li>
-                    <span><i class="fas fa-flag"></i></span> {{project.openIssues}} </li>
-                </ul>
-              </div>
-          </div>
-  
-          <div id="new-project-modal" class="modal fade"  tabindex="-1" aria-roledescription="dialog"
-            aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-              <div class="modal-content">
-  
-                <form role="form" method="post" @submit.prevent="submitProject($data)">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add New Project</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="form-group">
-                      <label for="number">Project Number</label>
-                      <input id="number" v-model="newProject.ProjectNumber" name="ProjectNumber" class="form-control"
-                        type="text" required>
-                    </div>
-                    <div class="form-group">
-                      <label for="name">Project Name</label>
-                      <input id="name" v-model="newProject.ProjectName" name="ProjectName" class="form-control"
-                        type="text">
-                    </div>
+            </li>
+          </ul>
+          
+          <div class="clear"></div>
+        </div>
+
+        <div id="new-project-modal" class="modal fade" tabindex="-1" aria-roledescription="dialog"
+          aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+              <form role="form" method="post" @submit.prevent="submitProject($data)">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Add New Project</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                      aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="number">Project Number</label>
+                    <input id="number" v-model="newProject.ProjectNumber" name="ProjectNumber" class="form-control"
+                      type="text" required>
                   </div>
                   <div class="form-group">
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                      <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
+                    <label for="name">Project Name</label>
+                    <input id="name" v-model="newProject.ProjectName" name="ProjectName" class="form-control"
+                      type="text">
                   </div>
-                </form>
-              </div>
+                </div>
+                <div class="form-group">
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
+
+
       </div>
-  
-  
     </div>
+  </div>
 
+  <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.11" crossorigin="anonymous"></script>
+  <script type="application/javascript" src="https://kit.fontawesome.com/e2b4ceabac.js"
+    crossorigin="anonymous"></script>
+  <script type="application/javascript" src="assets/js/site.js" crossorigin="anonymous"></script>
 
+</body>
 
-    <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.11" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="https://kit.fontawesome.com/e2b4ceabac.js" crossorigin="anonymous"></script>
-    <script type="application/javascript" src="assets/js/site.js" crossorigin="anonymous"></script>
-    
-  </body>
 </html>
