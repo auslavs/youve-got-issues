@@ -5,6 +5,9 @@
     "AzureWebjobsStorage": "UseDevelopmentStorage=true;",
     "FUNCTIONS_EXTENSION_VERSION": "~3",
     "StaticSite": "http://127.0.0.1:10000/devstoreaccount1/site",
-    "Sas":  ""
+    "Sas": ""
+  },
+  "Host": {
+    "CORS": "*"
   }
 }
