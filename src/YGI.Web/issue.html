@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <title>You&#39;ve Got Issues</title>
+  <style>
+    [v-cloak] {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
@@ -24,7 +29,7 @@
   </nav>
 
   <nav id="breadcrumb" aria-label="breadcrumb">
-    <ol class="breadcrumb">
+    <ol v-cloak class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
       <li class="breadcrumb-item" v-for="crumb in breadcrumb" v-if="!crumb.active" :key="crumb.text"><a
           v-bind:href="crumb.link">{{crumb.text}}</a></li>
@@ -37,22 +42,26 @@
 
     <div>
 
-      <div class="card" style="max-width: 48rem;">
+      <div v-show="loading" style="text-align: center; font-size: 0.5rem; color: #e9ecef;">
+        <i class="fas fa-spinner fa-pulse fa-10x mr-3"></i>
+      </div>
 
-        
+      <div v-cloak v-show="!loading" class="card mx-auto" style="max-width: 48rem; margin-bottom: 15px;">
 
+        <div v-show="!isEditing" class="card-body">
+          <h4 class="card-title">{{issue.title}}</h4>
+          <button type="button" data-toggle="modal" data-target="#new-project-modal"
+            style="float: right; border: none; cursor: pointer; font-size: 16px; background-color: white;"
+            v-on:click="isEditing = true">
+            <i class="far fa-edit"></i>
+          </button>
 
-        <div class="card-body">
-
-          <h4 class="card-title">{{String(issue.itemNo)}} - {{issue.title}}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">
-              <span>Raised By: {{issue.raisedBy}} on the </span>
-              <time v-bind:datetime="issue.raised">{{issue.raised | formatDate}}</time>
-            </h6>
+          <h6 class="card-subtitle mb-2 text-muted">
+            <span>Raised By: {{issue.raisedBy}} on the </span>
+            <time v-bind:datetime="issue.raised">{{issue.raised | formatDate}}</time>
+          </h6>
           <hr />
           <p>{{issue.description}}</p>
-          <br/>
-          <br/>
 
           <dl class="row">
             <dt class="col-lg-3">Area</dt>
@@ -66,13 +75,71 @@
             <dt class="col-lg-3">Status</dt>
             <dd class="col-lg-9">{{issue.status}}</dd>
           </dl>
+        </div>
 
+        <div v-show="isEditing" class="card-body">
+
+          <form role="form" method="post" @submit.prevent="submitIssue($data)">
+
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input id="title" name="Title" v-model="issue.title" class="form-control" type="text" required />
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" name="Description" v-model="issue.description" class="form-control" rows="5"
+                maxlength="500" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="area">Area</label>
+              <input id="area" name="Area" v-model="issue.area" class="form-control" list="area-lst" type="text"
+                required>
+              <datalist id="area-lst">
+                <option v-for="area in areaList">
+                  {{ area }}
+                </option>
+              </datalist>
+            </div>
+
+            <div class="form-group">
+              <label for="equipment">Equipment</label>
+              <input id="equipment" name="Equipment" v-model="issue.equipment" class="form-control" list="equipment-lst"
+                type="text" required />
+              <datalist id="equipment-lst">
+                <option v-for="equipment in equipmentTypes">
+                  {{ equipment }}
+                </option>
+              </datalist>
+            </div>
+
+            <div class="form-group">
+              <label for="issue-type">Issue Type</label>
+              <select id="issue-type" name="IssueType" v-model="issue.issueType" class="form-control" required>
+                <option style="display:none"></option>
+                <option v-for="type in issueTypes">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="raised-by">Raised By</label>
+              <input id="raised-by" name="RaisedBy" v-model="issue.raisedBy" class="form-control" type="text"
+                required />
+            </div>
+
+            <div class="form-group">
+              <button type="button" class="btn btn-secondary" v-on:click="isEditing = false">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+
+          </form>
         </div>
 
       </div>
-
     </div>
-
   </div>
 
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"

@@ -43,6 +43,8 @@ new Vue({
   el: '#issues-detail',
   data() {
     return {
+      loading: true,
+      isEditing: false,
       model: null,
       issueTypes: null,
       equipmentTypes: null,
@@ -72,7 +74,8 @@ new Vue({
           this.issue = response.data.issue,
           this.issueTypes = response.data.issueTypes,
           this.equipmentTypes = response.data.equipmentTypes,
-          this.areaList = response.data.areaList
+          this.areaList = response.data.areaList,
+          this.loading = false
         ))
     }
   },
