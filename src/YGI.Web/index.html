@@ -32,9 +32,13 @@
     <p></p>
 
     <div class="container-fluid">
-
       <div id="project-list">
-        <div class="float_center">
+
+        <div v-show="loading" style="text-align: center; font-size: 0.5rem; color: #d8d8d8ab;">
+          <i class="fas fa-spinner fa-pulse fa-10x mr-3"></i>
+        </div>
+
+        <div v-cloak v-show="!loading" class="float_center">
           <ul class="child">
             <li>
               <div class="property-card" v-for="project in projects" :key="project.projectNumber">
