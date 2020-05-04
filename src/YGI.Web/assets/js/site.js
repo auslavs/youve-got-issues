@@ -10,6 +10,7 @@ Vue.config.devtools = true;
         el: '#project-list',
         data() {
           return {
+            loading: true,
             model: null,
             projects: null,
             newProject: {
@@ -26,7 +27,8 @@ Vue.config.devtools = true;
               .get('/api/summary')
               .then(response => (
                 this.model = response.data,
-                this.projects = response.data.projList
+                this.projects = response.data.projList,
+                this.loading = false
               ))
           },
           submitProject: function () {

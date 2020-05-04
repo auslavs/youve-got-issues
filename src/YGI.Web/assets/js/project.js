@@ -12,6 +12,7 @@ new Vue({
   el: '#issues-list',
   data() {
     return {
+      loading: true,
       model: null,
       issues: null,
       issueTypes: null,
@@ -37,7 +38,8 @@ new Vue({
           this.issues = response.data.issues,
           this.issueTypes = response.data.issueTypes,
           this.equipmentTypes = response.data.equipmentTypes,
-          this.areaList = response.data.areaList
+          this.areaList = response.data.areaList,
+          this.loading = false
         ))
     },
     submitIssue: function () {
