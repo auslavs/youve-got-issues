@@ -39,6 +39,7 @@ module App =
       GET  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.getIssueDetail ("P" + proj) id)
       POST >=> routef "/api/P%s" (fun _ -> Index.createNewProject)
       POST >=> routef "/api/P%s/issues" (fun proj -> Project.createNewIssue ("P" + proj))
+      PUT  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.updateIssue ("P" + proj) id)
     ]
 
   let errorHandler (ex : exn) (logger : ILogger) =

@@ -7,21 +7,36 @@
   type YgiEvent =
     | AddNewProject of YgiEvent<NewProjectDto>
     | AddNewIssue of YgiEvent<NewIssueDto>
+    | UpdateIssue of YgiEvent<IssueUpdateDto>
 
   type AddNewProjectEvent(evt:YgiEvent<NewProjectDto>) =
-    inherit TableEntity(partitionKey=evt.State.ProjectNumber, rowKey=evt.Cid)
+    inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
     new() = AddNewProjectEvent()
 
   type AddNewIssueEvent(evt:YgiEvent<NewIssueDto>) =
-    inherit TableEntity(partitionKey=evt.State.ProjectNumber, rowKey=evt.Cid)
+    inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
     new() = AddNewIssueEvent()
 
-  module AddNewProjectEvent =
+  type UpdateIssueEvent(evt:YgiEvent<IssueUpdateDto>) =
+    inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
+    new() = UpdateIssueEvent()
 
-    let create state cid =
-      { State = state; Cid = cid }
+  module YgiEvent =
 
-  module AddNewIssueEvent =
+    let create cid projNum state  =
+      { Cid = cid; ProjectNumber = projNum; State = state;  }
 
-    let create state cid =
-      { State = state; Cid = cid }
+  //module AddNewProjectEvent =
+
+  //  let create cid projNum state  =
+  //    { Cid = cid; ProjectNumber = projNum; State = state;  }
+
+  //module AddNewIssueEvent =
+
+  //  let create cid projNum state =
+  //    { Cid = cid; ProjectNumber = projNum; State = state;  }
+
+  //module UpdateIssueEvent =
+
+  //  let create cid projNum state =
+  //    { Cid = cid; ProjectNumber = projNum; State = state;  }

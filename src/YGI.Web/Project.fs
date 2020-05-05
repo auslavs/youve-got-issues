@@ -29,7 +29,7 @@ module Project =
         let! dto = ctx.BindJsonAsync<NewIssueDto>()
 
         let! taskResult = taskResult {
-          let event = AddNewIssueEvent.create dto ""
+          let event = YgiEvent.create "" projNum dto
           return! Api.CreateNewIssue logger projNum event
         }
 

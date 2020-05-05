@@ -145,7 +145,7 @@
     ProjectName    : string
     AreaList       : string []
     EquipmentTypes : string [] 
-    IssueTypes     : string [] 
+    IssueTypes     : string []
     Issues         : IssueDto []
     LastChanged    : DateTime
     Vid            : Guid
@@ -201,8 +201,9 @@
     ProjectNumber  : string
     ProjectName    : string
     AreaList       : string []
-    EquipmentTypes : string [] 
-    IssueTypes     : string [] 
+    EquipmentTypes : string []
+    IssueTypes     : string []
+    StatusTypes    : string []
     Issue          : IssueDto
   }
 
@@ -221,10 +222,46 @@
             AreaList       = state.AreaList
             EquipmentTypes = state.EquipmentTypes
             IssueTypes     = state.IssueTypes
+            StatusTypes    = Status.statusOptions |> List.toArray
             Issue          = issue
           }
         Result.Ok view
     
+  [<CLIMutable>]
+  type IssueUpdateDto = {
+    ItemNo      : int
+    Title       : string
+    Description : string
+    Area        : string
+    Equipment   : string
+    IssueType   : string
+    Status      : string
+    Vid         : string
+  }
+
+  module IssueUpdateDto = 
+    let toIssueUpdate (dto:IssueUpdateDto) : Result<IssueUpdate, string> = 
+      result {
+        let! title       = String100.create "Title" dto.Title
+        let! description = String500.create "Description" dto.Description
+        let! area        = String50.create "Area" dto.Area
+        let! equip       = String50.create "Equipment" dto.Equipment
+        let! issueType   = String50.create "IssueType" dto.IssueType
+        let! status      = Status.fromStr dto.Status
+        let! vid         = Vid.create dto.Vid
+
+        return {
+          ItemNo      = dto.ItemNo
+          Title       = title
+          Description = description
+          Area        = area
+          Equipment   = equip
+          IssueType   = issueType
+          Status      = status
+          Vid         = vid
+        }
+      }
+
 
   [<CLIMutable>]
   type ProjectSummaryDto = {

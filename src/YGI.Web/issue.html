@@ -79,22 +79,25 @@
 
         <div v-show="isEditing" class="card-body">
 
-          <form role="form" method="post" @submit.prevent="submitIssue($data)">
+          <form role="form" method="post" @submit.prevent="updateIssue($data)">
 
             <div class="form-group">
               <label for="title">Title</label>
-              <input id="title" name="Title" v-model="issue.title" class="form-control" type="text" required />
+              <input id="title" name="Title" v-model="issueUpdate.title" class="form-control" type="text" required />
             </div>
+
+            <input type="hidden" id="itemNo" name="ItemNo" v-model="issueUpdate.title">
+            <input type="hidden" id="vid" name="Vid" v-model="issueUpdate.vid">
 
             <div class="form-group">
               <label for="description">Description</label>
-              <textarea id="description" name="Description" v-model="issue.description" class="form-control" rows="5"
+              <textarea id="description" name="Description" v-model="issueUpdate.description" class="form-control" rows="5"
                 maxlength="500" required></textarea>
             </div>
 
             <div class="form-group">
               <label for="area">Area</label>
-              <input id="area" name="Area" v-model="issue.area" class="form-control" list="area-lst" type="text"
+              <input id="area" name="Area" v-model="issueUpdate.area" class="form-control" list="area-lst" type="text"
                 required>
               <datalist id="area-lst">
                 <option v-for="area in areaList">
@@ -105,7 +108,7 @@
 
             <div class="form-group">
               <label for="equipment">Equipment</label>
-              <input id="equipment" name="Equipment" v-model="issue.equipment" class="form-control" list="equipment-lst"
+              <input id="equipment" name="Equipment" v-model="issueUpdate.equipment" class="form-control" list="equipment-lst"
                 type="text" required />
               <datalist id="equipment-lst">
                 <option v-for="equipment in equipmentTypes">
@@ -116,7 +119,7 @@
 
             <div class="form-group">
               <label for="issue-type">Issue Type</label>
-              <select id="issue-type" name="IssueType" v-model="issue.issueType" class="form-control" required>
+              <select id="issue-type" name="IssueType" v-model="issueUpdate.issueType" class="form-control" required>
                 <option style="display:none"></option>
                 <option v-for="type in issueTypes">
                   {{ type }}
@@ -125,13 +128,25 @@
             </div>
 
             <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" name="Status" v-model="issueUpdate.status" class="form-control" required>
+                <option style="display:none"></option>
+                <option v-for="type in statusTypes">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+
+            <!-- <div class="form-group">
               <label for="raised-by">Raised By</label>
               <input id="raised-by" name="RaisedBy" v-model="issue.raisedBy" class="form-control" type="text"
                 required />
-            </div>
+            </div> -->
+
+            <br />
 
             <div class="form-group">
-              <button type="button" class="btn btn-secondary" v-on:click="isEditing = false">Cancel</button>
+              <button type="button" class="btn btn-secondary" v-on:click="cancelEditing()">Cancel</button>
               <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
 

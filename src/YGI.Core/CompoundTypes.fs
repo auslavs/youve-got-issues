@@ -3,8 +3,9 @@
   open System
 
   type YgiEvent<'T> = {
-    State : 'T
-    Cid   : string
+    Cid           : string
+    ProjectNumber : string
+    State         : 'T
   }
 
   type UnvalidatedNewIssue = {
@@ -30,6 +31,17 @@
     Raised      : DateTime
     LastChanged : DateTime
     DateClosed  : DateTime option
+    Vid         : Guid
+  }
+
+  type IssueUpdate = {
+    ItemNo      : int
+    Title       : String100
+    Description : String500
+    Area        : String50
+    Equipment   : String50
+    IssueType   : String50
+    Status      : Status
     Vid         : Guid
   }
 
@@ -74,6 +86,22 @@
         Vid         = new Guid()
       }
 
+    let update (issue:Issue) (update:IssueUpdate) =
+      if issue.ItemNo = update.ItemNo && issue.Vid = update.Vid then
+        Ok {
+          issue with 
+            Title       = update.Title
+            Description = update.Description
+            Area        = update.Area
+            Equipment   = update.Equipment
+            IssueType   = update.IssueType
+            Status      = update.Status
+            LastChanged = DateTime.Now
+            Vid         = Guid.NewGuid()
+        }
+      else 
+        Error <| sprintf "Failed to update issue %A, update %A" issue update
+
   module ProjectState =
 
     let toProjectNumberStr (state:ProjectState) = 
@@ -104,6 +132,17 @@
       let lst1 = issuesList |> List.map (fun i -> i.IssueType) |> List.distinct
       [ DefaultIssueTypes.value; lst1 ] |> List.concat |> distinctAndSort
 
+    let private addOrReplace (lst:Issue list) (issue:Issue) =
+      let rec search (input:Issue list) acc found = 
+        match input with
+        | [] -> if found then acc else (issue::acc)
+        | x::xs ->
+          if issue.ItemNo = x.ItemNo then 
+            search xs (issue::acc) true
+          else
+            search xs (x::acc) found
+      search lst [] false
+
     /// <summary>
     /// Adds a new issue to the IssueListState and returns the new state.
     /// </summary>
@@ -130,6 +169,20 @@
           LastChanged = DateTime.Now
           Vid = new Guid()
       }
+
+    let updateIssue (state:ProjectState) (update:IssueUpdate) =
+      
+      let result = 
+        state.Issues 
+        |> List.tryFind (fun i -> i.ItemNo = update.ItemNo)
+        |> Option.map (fun i -> Issue.update i update)
+        |> function
+        | Some issueResult -> issueResult
+        | None -> Error <| sprintf "Could not find Issue %i" update.ItemNo
+
+      result 
+      |> Result.map (addOrReplace state.Issues)
+      |> Result.bind (fun newIssuesList -> Ok { state with Issues = newIssuesList } )
 
     let toProjectSummary (state:ProjectState) =
       {

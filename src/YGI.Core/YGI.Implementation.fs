@@ -72,6 +72,33 @@
         return newState
       }
 
+  type LogIssueUpdateEvent = LogEvent<IssueUpdateDto>
+  type UpdateIssue = ApplyEvent<ProjectState,IssueUpdateDto>
+
+  let updateIssueWorkflow
+    (logger : Logger)
+    (logEvent:LogIssueUpdateEvent)
+    (leaseProjectState:LeaseProjectState)
+    (updateIssue: UpdateIssue)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary: UpdateProjectSummary)
+    =
+
+    fun projNum event -> 
+      taskResult {
+
+        logger Info <| sprintf "Recieved Event:\r\n%A" event
+
+        let eventBody = logEvent logger event ()
+        let! dto, leaseId = leaseProjectState logger projNum () |> TaskResult.ofTask
+        let! currentState = dto |> ProjectStateDto.toProjectState |> TaskResult.ofResult
+        let! newState = updateIssue currentState eventBody |> TaskResult.ofResult
+        do! updateProjectState logger newState leaseId |> TaskResult.ofTask
+        do! updateProjectSummary logger newState
+
+        return newState
+      }
+
   type GetProjectState = TaskResult<ProjectStateDto,string>
   type CreateIssueDetailViewDto = ProjectStateDto -> Result<IssueDetailViewDto,string>
 

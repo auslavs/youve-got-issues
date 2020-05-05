@@ -5,6 +5,7 @@
   type String50  = private String50  of string
   type String100 = private String100 of string
   type String500 = private String500 of string
+  type Vid       = private Vid of Guid
 
   type Status =
     | Unopened
@@ -140,6 +141,15 @@
     let createOption fieldName str = 
         ConstrainedType.createStringOption fieldName String500 500 str
 
+  module Vid = 
+    let value (Vid guid) = guid
+
+    let create (str:string) = 
+      let result, value = Guid.TryParse(str)
+      match result with
+      | true -> Ok value
+      | false -> Error <| sprintf "Failed to parse Vid: %s" str
+
   module DefaultIssueTypes =
 
     let value =
@@ -158,23 +168,38 @@
       | Error err -> failwithf "Error creating Default Issue Types - %s" err
 
   module Status =
-    
+
+    let [<Literal>] private UNOPENED   = "Unopened"
+    let [<Literal>] private OPEN       = "Open"
+    let [<Literal>] private INPROGRESS = "In Progress"
+    let [<Literal>] private VERIFY     = "Verify"
+    let [<Literal>] private CLOSED     = "Closed"
+
     let toStr s =
       match s with
-      | Unopened   -> "Unopened"
-      | Open       -> "Open"
-      | InProgress -> "InProgress"
-      | Verify     -> "Verify"
-      | Closed     -> "Closed"
+      | Unopened   -> UNOPENED
+      | Open       -> OPEN
+      | InProgress -> INPROGRESS
+      | Verify     -> VERIFY
+      | Closed     -> CLOSED
 
     let fromStr status =
       match status with
-      | "Unopened"   -> Ok Unopened
-      | "Open"       -> Ok Open
-      | "InProgress" -> Ok InProgress
-      | "Verify"     -> Ok Verify
-      | "Closed"     -> Ok Closed
-      | _            -> Error <| sprintf "Failed to parse Status: %s" status
+      | UNOPENED   -> Ok Unopened
+      | OPEN       -> Ok Open
+      | INPROGRESS -> Ok InProgress
+      | VERIFY     -> Ok Verify
+      | CLOSED     -> Ok Closed
+      | _             -> Error <| sprintf "Failed to parse Status: %s" status
+
+    let statusOptions =
+      [
+        UNOPENED
+        OPEN
+        INPROGRESS
+        VERIFY
+        CLOSED
+      ]
 
   [<AutoOpen>]
   module Error =

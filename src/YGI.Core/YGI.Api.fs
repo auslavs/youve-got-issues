@@ -84,6 +84,33 @@
         workflow projNum evt
 
 
+  let private logIssueUpdateEvent : LogIssueUpdateEvent =
+    fun logger evt () -> 
+      StoreEvent eventsTable UpdateIssueEvent logger evt () |> ignore
+      evt.State
+
+
+  let private updateIssueInProject : UpdateIssue = 
+    fun (state:ProjectState) (evt:IssueUpdateDto) -> result {
+      let! update = IssueUpdateDto.toIssueUpdate evt
+      return! ProjectState.updateIssue state update
+      }
+
+  let UpdateIssue =
+    fun (logger:Logger) projNum evt ->
+
+        let workflow = 
+            Implementation.updateIssueWorkflow
+              logger
+              logIssueUpdateEvent
+              leaseProject
+              updateIssueInProject
+              updateProjectState
+              updateProjectSummary
+
+        workflow projNum evt
+
+
   let private getProjectState logger projNum : GetProjectState =
       taskResult {
 

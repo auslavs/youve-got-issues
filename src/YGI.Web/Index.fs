@@ -116,7 +116,7 @@ module Index =
         let! dto = ctx.BindJsonAsync<NewProjectDto>()
 
         let! taskResult = taskResult {
-          let event = AddNewProjectEvent.create dto ""
+          let event = YgiEvent.create "" dto.ProjectNumber dto
           return! Api.CreateNewProject logger event
         }
 
