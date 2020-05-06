@@ -22,23 +22,19 @@ module App =
       return! Successful.OK "ok" next ctx
     }
 
-  let indexPage   : HttpHandler = route "/" >=> htmlFile "index.html"
-  let projectPage : HttpHandler = routex "\/P\d{5}" >=> htmlFile "project.html"
-  let issuesPage  : HttpHandler = routex "\/P\d{5}\/[0-9]+" >=> htmlFile "issue.html"
-  let issuesApi   : HttpHandler = routex "\/api\/(P\d{5})\/([0-9]+)" 
-    
+  //let indexPage   : HttpHandler = route "/" >=> htmlFile "index.html"
+  //let projectPage : HttpHandler = routex "\/P\d{5}" >=> htmlFile "project.html"
+  //let issuesPage  : HttpHandler = routex "\/P\d{5}\/[0-9]+" >=> htmlFile "issue.html"
+  //let issuesApi   : HttpHandler = routex "\/api\/(P\d{5})\/([0-9]+)" 
 
   let app : HttpHandler =
 
     choose [
-      //GET  >=> indexPage
-      //GET  >=> projectPage
-      //GET  >=> issuesPage 
-      GET  >=> route "/api/summary" >=> Index.getApiHandler
-      GET  >=> routef "/api/%s" (fun proj -> Project.getApiHandler proj)
+      GET  >=> route "/api/summary" >=> Handlers.getProjectList
+      GET  >=> routef "/api/%s" (fun proj -> Handlers.getProjectIssuesList proj)
       GET  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.getIssueDetail ("P" + proj) id)
-      POST >=> routef "/api/P%s" (fun _ -> Index.createNewProject)
-      POST >=> routef "/api/P%s/issues" (fun proj -> Project.createNewIssue ("P" + proj))
+      POST >=> routef "/api/P%s" (fun _ -> Handlers.createNewProject)
+      POST >=> routef "/api/P%s/issues" (fun proj -> Handlers.createNewIssue ("P" + proj))
       PUT  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.updateIssue ("P" + proj) id)
     ]
 

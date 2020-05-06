@@ -3,6 +3,7 @@
   open YGI.Common
   open YGI.Dto
   open Microsoft.Azure.Cosmos.Table
+  open Newtonsoft.Json
 
   type YgiEvent =
     | AddNewProject of YgiEvent<NewProjectDto>
@@ -11,32 +12,24 @@
 
   type AddNewProjectEvent(evt:YgiEvent<NewProjectDto>) =
     inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
-    new() = AddNewProjectEvent()
+    new(evt) = AddNewProjectEvent(evt)
+    member val EventType = "AddNewProject" with get,set
+    member val Event = (JsonConvert.SerializeObject evt) with get,set
 
   type AddNewIssueEvent(evt:YgiEvent<NewIssueDto>) =
     inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
-    new() = AddNewIssueEvent()
+    new(evt) = AddNewIssueEvent(evt)
+    member val EventType = "AddNewIssue" with get,set
+    member val Event = (JsonConvert.SerializeObject evt) with get,set
 
+  //type UpdateIssueEvent(partitionKey, rowKey, event) =
   type UpdateIssueEvent(evt:YgiEvent<IssueUpdateDto>) =
-    inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
-    new() = UpdateIssueEvent()
+    inherit TableEntity(evt.ProjectNumber, evt.Cid)
+    new(evt) = UpdateIssueEvent(evt)
+    member val EventType = "UpdateIssue" with get,set
+    member val Event = (JsonConvert.SerializeObject evt) with get,set
 
   module YgiEvent =
 
     let create cid projNum state  =
       { Cid = cid; ProjectNumber = projNum; State = state;  }
-
-  //module AddNewProjectEvent =
-
-  //  let create cid projNum state  =
-  //    { Cid = cid; ProjectNumber = projNum; State = state;  }
-
-  //module AddNewIssueEvent =
-
-  //  let create cid projNum state =
-  //    { Cid = cid; ProjectNumber = projNum; State = state;  }
-
-  //module UpdateIssueEvent =
-
-  //  let create cid projNum state =
-  //    { Cid = cid; ProjectNumber = projNum; State = state;  }
