@@ -56,10 +56,11 @@
             <i class="far fa-edit"></i>
           </button>
 
-          <h6 class="card-subtitle mb-2 text-muted">
+          <small class="text-muted">
             <span>Raised By: {{issue.raisedBy}} on the </span>
             <time v-bind:datetime="issue.raised">{{issue.raised | formatDate}}</time>
-          </h6>
+          </small>
+
           <hr />
           <p>{{issue.description}}</p>
 
