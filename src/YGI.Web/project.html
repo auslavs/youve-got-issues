@@ -9,7 +9,19 @@
 
   <title>You&#39;ve Got Issues</title>
   <style>
-    [v-cloak] { display: none; }
+    [v-cloak] {
+      display: none;
+    }
+
+    td a {
+      display: block;
+      color: #212529;
+    }
+
+    td :hover {
+      color: #212529;
+      text-decoration: none;
+    }
   </style>
 
 </head>
@@ -50,7 +62,7 @@
       <thead>
         <tr>
           <th scope="col" class="" style="width: 30px;">#</th>
-          <th scope="col" class="" >Area</th>
+          <th scope="col" class="">Area</th>
           <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Equipment</th>
           <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Issue Type</th>
           <th scope="col">Issue</th>
@@ -59,26 +71,45 @@
       </thead>
       <tbody>
         <tr v-for="issue in issues" :key="issue.ItemNo">
-          <td scope="row" class=""><a v-bind:href="path + '/' + issue.itemNo">{{ issue.itemNo }}</a></td>
-          <td scope="row" class="">{{ issue.area }}</td>
-          <td scope="row" class="d-none d-lg-table-cell">{{ issue.equipment }}</td>
-          <td scope="row" class="d-none d-lg-table-cell">{{ issue.issueType }}</td>
+          <!-- <a v-bind:href="path + '/' + issue.itemNo"> -->
+          <td scope="row">
+            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.itemNo }}</a>
+          </td>
+          <td scope="row">
+            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.area }}</a>
+          </td>
+          <td scope="row" class="d-none d-lg-table-cell"><a
+              v-bind:href="path + '/' + issue.itemNo">{{ issue.equipment }}</a></td>
+          <td scope="row" class="d-none d-lg-table-cell">
+            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.issueType }}</a>
+          </td>
           <td scope="row" class="d-lg-none">
-            {{ issue.title }}
+            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.title }}</a>
           </td>
           <td scope="row" class="d-none d-lg-table-cell">
-            <h5>{{ issue.title }}</h5>
-            {{ issue.description }}
+            <a v-bind:href="path + '/' + issue.itemNo">
+              <h5>{{ issue.title }}</h5>
+              {{ issue.description }}
+            </a>
           </td>
-          <!-- <td class="d-none d-md-block d-lg-block d-xl-table-cell" >Raised By: {{ issue.raisedBy }}</td> -->
-          <td class="d-none d-md-block">Raised By: {{ issue.raisedBy }}</td>
-          <td class="d-none d-md-block">Raised: {{ issue.raised | formatDate }}</td>
-          <td class="d-none d-md-block">Last Changed: {{ issue.lastChanged | formatDate }}</td>
-          <td class="d-none d-md-block">Status: {{ issue.status }}</td>
           <td class="d-none d-md-block">
-            <i class="far fa-comments"></i>
-            <i class="fas fa-paperclip"></i>
+            <a v-bind:href="path + '/' + issue.itemNo">Raised By: {{ issue.raisedBy }}</a>
           </td>
+          <td class="d-none d-md-block">
+            <a v-bind:href="path + '/' + issue.itemNo">Raised: {{ issue.raised | formatDate }}</a></td>
+          <td class="d-none d-md-block">
+            <a v-bind:href="path + '/' + issue.itemNo">Last Changed: {{ issue.lastChanged | formatDate }}</a>
+          </td>
+          <td class="d-none d-md-block">
+            <a v-bind:href="path + '/' + issue.itemNo">Status: {{ issue.status }}</a>
+          </td>
+          <td class="d-none d-md-block">
+            <a v-bind:href="path + '/' + issue.itemNo">
+              <i class="far fa-comments"></i>
+              <i class="fas fa-paperclip"></i>
+            </a>
+          </td>
+          <!-- </a> -->
         </tr>
       </tbody>
     </table>
@@ -102,8 +133,8 @@
 
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" name="Description" v-model="newIssue.Description" class="form-control" rows="5" maxlength="500"
-                  required></textarea>
+                <textarea id="description" name="Description" v-model="newIssue.Description" class="form-control"
+                  rows="5" maxlength="500" required></textarea>
               </div>
 
               <div class="form-group">
