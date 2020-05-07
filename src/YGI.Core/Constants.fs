@@ -6,3 +6,4 @@
   let [<Literal>] EventTable     = "events"
 
   let projectBlobPath projNum = projNum + "/"+ projNum + ".json"
+  let projectAttachmentsPath projNum filename = projNum + "/"+ filename

@@ -6,12 +6,14 @@
   open FSharp.Control.Tasks.V2
   open Newtonsoft.Json
   open YGI.Dto
+  open System.IO
   
   //let private eventsTable = (getTableReference Constants.EventTable).Result
   let private getBlob = StorageHelpers.GetBlob Constants.ContainerId
   let private createBlob = StorageHelpers.CreateBlob Constants.ContainerId
   let private leaseBlob = StorageHelpers.GetBlobWithLease Constants.ContainerId
   let private updateBlob = StorageHelpers.UpdateBlob Constants.ContainerId
+  let private uploadBlob = StorageHelpers.UploadBlobFromStream Constants.ContainerId
 
   let initProjectSummary () = 
     
@@ -118,6 +120,13 @@
       let blob = Constants.projectBlobPath project.ProjectNumber
       let jsonStr = project |> JsonConvert.SerializeObject
       return! updateBlob blob leaseId jsonStr
+    }
+
+  let uploadAttachment (logger:Logger) (projNum) (file:FileUpload) =
+    task{
+      logger Info <| sprintf "Uploading Attachement: %s - %s" file.Id file.Filename
+      let blob = Constants.projectAttachmentsPath projNum file.Id
+      return! uploadBlob blob file.ContentType file.Stream
     }
 
 

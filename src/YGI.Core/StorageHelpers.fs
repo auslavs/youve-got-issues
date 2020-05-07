@@ -91,7 +91,20 @@
 
       match exists with
       | false -> return! cloudBlockBlob.UploadTextAsync(text)
-      | true -> failwithf "Blob already exists: %s" text
+      | true -> failwithf "Blob already exists: %s" blobName
+    }
+
+
+  let UploadBlobFromStream containerId blobName contentType stream = 
+    task {
+      let cloudBlockBlob = getBlobReference containerId blobName
+      let! exists = blobExists cloudBlockBlob
+
+      match exists with
+      | false ->
+        cloudBlockBlob.Properties.ContentType <- contentType
+        return! cloudBlockBlob.UploadFromStreamAsync(stream)
+      | true -> failwithf "Blob already exists: %s" blobName
     }
 
   let UpdateBlob containerId blobName leaseId text = 

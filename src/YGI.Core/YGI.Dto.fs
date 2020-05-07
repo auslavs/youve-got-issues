@@ -3,6 +3,13 @@
   open System
   open YGI.Common
 
+  type FileUpload = {
+    Id : string
+    Filename : string
+    ContentType : string
+    Stream : System.IO.Stream
+  }
+
   [<CLIMutable>]
   type NewIssueDto = {
     ProjectNumber : string

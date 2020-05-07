@@ -5,6 +5,7 @@
   open YGI
   open YGI.Dto
   open YGI.Events
+  open System
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -108,4 +109,28 @@
           | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
 
         return! response
+      }
+
+  let uploadAttachment projNum _ : HttpHandler =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+      task {
+        let cid = GetRequestId ctx
+        let logger = Logging.log <| ctx.GetLogger()
+        let uploadAttachment = YGI.Storage.uploadAttachment logger projNum
+
+        let toFileUpload (file:IFormFile) = {
+            Id = Guid.NewGuid().ToString()
+            Filename = file.FileName
+            ContentType = file.ContentType
+            Stream = file.OpenReadStream()
+          }
+
+        let files = ctx.Request.Form.Files |> Seq.map toFileUpload 
+
+        // Needed to do this in a for loop rather than using a map function.
+        // Somehow streams were being read before the previous stream had closed, throwing an exception.
+        for file in files do
+          do! uploadAttachment file
+
+        return! (Successful.OK "") next ctx
       }

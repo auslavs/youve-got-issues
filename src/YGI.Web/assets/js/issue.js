@@ -59,6 +59,9 @@ new Vue({
     return {
       loading: true,
       isEditing: false,
+      files: [],
+      uploadProgress:0,
+      uploadProgressVisible:false,
       model: null,
       issueTypes: null,
       statusTypes: null,
@@ -96,6 +99,38 @@ new Vue({
       this.isEditing = false,
       this.issueUpdate = toIssueUpdate(this.issue)
     },
+    addFiles(){
+      this.$refs.files.click();
+    },
+    uploadFiles(){
+      this.uploadProgressVisible = true;
+      this.files = this.$refs.files.files;
+      var size = 0;
+      let formData = new FormData();
+
+      for( var i = 0; i < this.files.length; i++ ){
+        let file = this.files[i];
+        size = size + file.size;
+        formData.append('files[' + i + ']', file);
+      }
+
+      axios.put('/api' + this.path +'/upload',
+        formData,
+        {
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          },
+          onUploadProgress: progressEvent => {
+            this.uploadProgress = ((progressEvent.loaded/size) * 100).toFixed(0)
+            console.log(this.uploadProgress);
+           } 
+        }
+      ).then(response => (
+        this.uploadProgressVisible = false,
+        this.uploadProgress = 0,
+        this.files = []
+      ))
+    },
     loadIssue: function () {
       axios
         .get('/api' + this.path)
@@ -131,6 +166,11 @@ new Vue({
         })
     }
   },
+  computed: {
+    widthPercentage() {
+        return this.uploadProgress + "%";
+    }
+},
   mounted() {
     this.loadIssue()
   }

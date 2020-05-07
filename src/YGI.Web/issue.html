@@ -11,6 +11,22 @@
     [v-cloak] {
       display: none;
     }
+
+    input[type="file"] {
+      /* position: absolute; */
+      display: none;
+      top: -500px;
+    }
+
+    div.file-listing {
+      width: 200px;
+    }
+
+    span.remove-file {
+      color: red;
+      cursor: pointer;
+      float: right;
+    }
   </style>
 </head>
 
@@ -75,6 +91,23 @@
             <dd class="col-lg-9">{{issue.lastChanged | formatDate}}</dd>
             <dt class="col-lg-3">Status</dt>
             <dd class="col-lg-9">{{issue.status}}</dd>
+            <dt class="col-lg-3">Attachments</dt>
+            <dd class="col-lg-9">
+
+              <div v-show="uploadProgressVisible" class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                  v-bind:aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100"
+                  v-bind:style="{ width: widthPercentage }">
+                </div>
+              </div>
+              <br />
+
+              <button type="button" class="btn btn-default btn-sm pull-right" v-on:click="addFiles()">
+                <i class="fas fa-paperclip"></i><span class="hidden-xs"> Attach Files</span>
+              </button>
+
+              <input type="file" id="files" ref="files" multiple v-on:change="uploadFiles()" />
+            </dd>
           </dl>
         </div>
 
@@ -92,8 +125,8 @@
 
             <div class="form-group">
               <label for="description">Description</label>
-              <textarea id="description" name="Description" v-model="issueUpdate.description" class="form-control" rows="5"
-                maxlength="500" required></textarea>
+              <textarea id="description" name="Description" v-model="issueUpdate.description" class="form-control"
+                rows="5" maxlength="500" required></textarea>
             </div>
 
             <div class="form-group">
@@ -109,8 +142,8 @@
 
             <div class="form-group">
               <label for="equipment">Equipment</label>
-              <input id="equipment" name="Equipment" v-model="issueUpdate.equipment" class="form-control" list="equipment-lst"
-                type="text" required />
+              <input id="equipment" name="Equipment" v-model="issueUpdate.equipment" class="form-control"
+                list="equipment-lst" type="text" required />
               <datalist id="equipment-lst">
                 <option v-for="equipment in equipmentTypes">
                   {{ equipment }}
@@ -152,6 +185,9 @@
             </div>
 
           </form>
+
+
+
         </div>
 
       </div>
