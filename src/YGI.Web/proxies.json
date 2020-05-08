@@ -12,17 +12,17 @@
     "attachments": {
       "matchCondition": {
         "methods": [ "GET" ],
-        "route": "/P{number}"
+        "route": "/P{number}/att/{*path}"
       },
-      "backendUri": "%StaticSite%/project.html%Sas%",
+      "backendUri": "%BaseStorage%/P{number}/att/{path}%BaseStorage_Sas%",
       "debug": false
     },
     "project": {
       "matchCondition": {
         "methods": [ "GET" ],
-        "route": "/P{number}/att/{issue}/{filename}"
+        "route": "/P{number}"
       },
-      "backendUri": "%StaticSite%/P{number}/att/{issue}/{filename}%Sas%",
+      "backendUri": "%StaticSite%/project.html%Sas%",
       "debug": false
     },
     "issue": {
