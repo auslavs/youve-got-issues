@@ -7,6 +7,7 @@
   open YGI.Events
   open System
   open System.Threading
+  open System.Net.Http
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -133,18 +134,18 @@
         } 
 
         /// Convert to domain friendly Attachemnt Stream
-        let files = ctx.Request.Form.Files |> Seq.map toFileStream 
+        let files = ctx.Request.Form.Files |> Seq.toArray |> Array.map toFileStream 
 
         /// Upload each attachment
         let! attachmentDetailsLst =  
           /// Needed to do this in a for loop rather than using a map function.
           /// Somehow streams were being read before the previous stream had closed, throwing an exception.
-          seq {
+          [|
             for file in files do
-              task{
+              task {
                 return! uploadAttachment file 
               }
-          } |> Threading.Tasks.Task.WhenAll
+          |] |> Threading.Tasks.Task.WhenAll
 
         /// Add the details of each uploaded attachment to the project
         let! resultArr = 
