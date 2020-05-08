@@ -2,13 +2,48 @@
 
   open System
   open YGI.Common
+  open System.IO
 
-  type FileUpload = {
-    Id : string
-    Filename : string
-    ContentType : string
-    Stream : System.IO.Stream
+  type AttachmentStream = {
+    Id            : string
+    ProjectNumber : string
+    IssueItemNo   : int
+    Filename      : string
+    ContentType   : string
+    Stream        : Stream
   }
+
+  type AttachmentDetailsDto = {
+    Id            : string
+    ProjectNumber : string
+    IssueItemNo   : int
+    Filename      : string
+    ContentType   : string
+    RelativeUrl   : string
+  }
+
+  module AttachmentDetailsDto = 
+    let toAttachmentDetails (dto:AttachmentDetailsDto) : Result<AttachmentDetails, string> = 
+      result {
+        return {
+          Id            = dto.Id
+          ProjectNumber = dto.ProjectNumber
+          IssueItemNo   = dto.IssueItemNo
+          Filename      = dto.Filename
+          ContentType   = dto.ContentType
+          RelativeUrl   = dto.RelativeUrl
+        }
+      }
+
+    let fromAttachmentDetails (a:AttachmentDetails) : AttachmentDetailsDto = 
+      {
+        Id            = a.Id
+        ProjectNumber = a.ProjectNumber
+        IssueItemNo   = a.IssueItemNo
+        Filename      = a.Filename
+        ContentType   = a.ContentType
+        RelativeUrl   = a.RelativeUrl
+      }
 
   [<CLIMutable>]
   type NewIssueDto = {
@@ -55,6 +90,7 @@
     Description : string
     Comments    : string []
     Resolution  : string
+    Attachments : AttachmentDetailsDto []
     RaisedBy    : string
     Status      : string
     Raised      : DateTime
@@ -71,6 +107,11 @@
         let string500ArrayHelper fieldName arr = 
           arr |> Array.map (String500.create fieldName) |> Array.toList |> Result.sequence
 
+        let attachmentArrayHelper arr = 
+          match arr with
+          | null -> Ok []
+          | _ -> arr |> Array.map (AttachmentDetailsDto.toAttachmentDetails) |> Array.toList |> Result.sequence
+
         let! area        = String50.create "Area" dto.Area
         let! equip       = String50.create "Equipment" dto.Equipment
         let! issueType   = String50.create "IssueType" dto.IssueType
@@ -78,6 +119,7 @@
         let! description = String500.create "Description" dto.Description
         let! comments    = string500ArrayHelper "Comments" dto.Comments
         let! resolution  = String500.createOption "Resolution" dto.Resolution
+        let! attachments = attachmentArrayHelper dto.Attachments
         let! raisedBy    = String100.create "RaisedBy" dto.RaisedBy
         let! status      = Status.fromStr dto.Status
 
@@ -87,10 +129,11 @@
             Area        = area
             Equipment   = equip
             IssueType   = issueType
-            Title  = title
+            Title       = title
             Description = description
             Comments    = comments
             Resolution  = resolution
+            Attachments = attachments
             RaisedBy    = raisedBy
             Status      = status
             Raised      = dto.Raised
@@ -109,6 +152,7 @@
       Description = String500.value i.Description
       Comments    = i.Comments |> List.map String500.value |> List.toArray
       Resolution  = i.Resolution |> Option.map String500.value |> Option.defaultValue ""
+      Attachments = i.Attachments |> List.map AttachmentDetailsDto.fromAttachmentDetails |> List.toArray
       RaisedBy    = String100.value i.RaisedBy
       Status      = Status.toStr i.Status
       Raised      = i.Raised

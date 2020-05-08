@@ -9,12 +9,20 @@
       "backendUri": "%StaticSite%/index.html%Sas%",
       "debug": false
     },
-    "project": {
+    "attachments": {
       "matchCondition": {
         "methods": [ "GET" ],
         "route": "/P{number}"
       },
       "backendUri": "%StaticSite%/project.html%Sas%",
+      "debug": false
+    },
+    "project": {
+      "matchCondition": {
+        "methods": [ "GET" ],
+        "route": "/P{number}/att/{issue}/{filename}"
+      },
+      "backendUri": "%StaticSite%/P{number}/att/{issue}/{filename}%Sas%",
       "debug": false
     },
     "issue": {

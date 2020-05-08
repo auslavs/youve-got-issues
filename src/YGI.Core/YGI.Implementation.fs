@@ -130,3 +130,30 @@
 
         return! result |> TaskResult.ofResult
       }
+
+  type LogAddAttachementEvent = LogEvent<AttachmentDetailsDto>
+  type AddAttachement = ApplyEvent<ProjectState,AttachmentDetailsDto>
+
+  let addAttchmentWorkflow
+    (logger : Logger)
+    (logEvent:LogAddAttachementEvent)
+    (leaseProjectState:LeaseProjectState)
+    (addAttachement: AddAttachement)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary: UpdateProjectSummary)
+    =
+
+    fun projNum event -> 
+      taskResult {
+
+        logger Info <| sprintf "Recieved Event:\r\n%A" event
+
+        let eventBody = logEvent logger event ()
+        let! dto, leaseId = leaseProjectState logger projNum () |> TaskResult.ofTask
+        let! currentState = dto |> ProjectStateDto.toProjectState |> TaskResult.ofResult
+        let! newState = addAttachement currentState eventBody |> TaskResult.ofResult
+        do! updateProjectState logger newState leaseId |> TaskResult.ofTask
+        do! updateProjectSummary logger newState
+
+        return newState
+      }

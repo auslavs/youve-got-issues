@@ -17,6 +17,15 @@
     RaisedBy    : String100
   }
 
+  type AttachmentDetails = {
+    Id            : string
+    ProjectNumber : string
+    IssueItemNo   : int
+    Filename      : string
+    ContentType   : string
+    RelativeUrl   : string
+  }
+
   type Issue = {
     ItemNo      : int
     Area        : String50
@@ -26,6 +35,7 @@
     Description : String500
     Comments    : String500 list
     Resolution  : String500 option
+    Attachments : AttachmentDetails list
     RaisedBy    : String100
     Status      : Status
     Raised      : DateTime
@@ -78,6 +88,7 @@
         Description = uni.Description
         Comments    = []
         Resolution  = None
+        Attachments = []
         RaisedBy    = uni.RaisedBy
         Status      = Status.Unopened
         Raised      = DateTime.Now
@@ -100,7 +111,23 @@
             Vid         = Guid.NewGuid()
         }
       else 
-        Error <| sprintf "Failed to update issue %A, update %A" issue update
+        Error <| sprintf "Failed to update Issue: %A, Update: %A" issue update
+
+    let addAttachment (issue:Issue) (attachment:AttachmentDetails) =
+      if issue.ItemNo = attachment.IssueItemNo then
+
+        let attachments = 
+          attachment::issue.Attachments
+          |> List.sortBy(fun a -> a.Filename)
+
+        Ok {
+          issue with 
+            Attachments = attachments
+            LastChanged = DateTime.Now
+            Vid         = Guid.NewGuid()
+        }
+      else 
+        Error <| sprintf "Failed to add attchment to Issue: %A, Attachment: %A" issue attachment
 
   module ProjectState =
 
@@ -179,6 +206,20 @@
         |> function
         | Some issueResult -> issueResult
         | None -> Error <| sprintf "Could not find Issue %i" update.ItemNo
+
+      result 
+      |> Result.map (addOrReplace state.Issues)
+      |> Result.bind (fun newIssuesList -> Ok { state with Issues = newIssuesList } )
+
+    let addAttachment (state:ProjectState) (attachment:AttachmentDetails) =
+      
+      let result = 
+        state.Issues 
+        |> List.tryFind (fun i -> i.ItemNo = attachment.IssueItemNo)
+        |> Option.map (fun i -> Issue.addAttachment i attachment)
+        |> function
+        | Some issueResult -> issueResult
+        | None -> Error <| sprintf "Could not find Issue %i" attachment.IssueItemNo
 
       result 
       |> Result.map (addOrReplace state.Issues)

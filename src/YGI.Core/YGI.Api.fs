@@ -142,3 +142,29 @@
           createIssueDetail
 
       workflow projNum issueNum
+
+
+  let private logAddAttachementEvent : LogAddAttachementEvent =
+    fun logger evt () -> 
+      StoreEvent eventsTable AddAttachementEvent logger evt () |> ignore
+      evt.State
+
+  let private addAttachement : AddAttachement = 
+    fun (state:ProjectState) (evt:AttachmentDetailsDto) -> result {
+      let! attachment = AttachmentDetailsDto.toAttachmentDetails evt
+      return! ProjectState.addAttachment state attachment
+      }
+
+  let AddAttachment =
+    fun (logger:Logger) projNum evt ->
+
+        let workflow = 
+            Implementation.addAttchmentWorkflow
+              logger
+              logAddAttachementEvent
+              leaseProject
+              addAttachement
+              updateProjectState
+              updateProjectSummary
+
+        workflow projNum evt

@@ -6,6 +6,7 @@
   open YGI.Dto
   open YGI.Events
   open System
+  open System.Threading
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -111,26 +112,55 @@
         return! response
       }
 
-  let uploadAttachment projNum _ : HttpHandler =
+
+
+  let uploadAttachment projNum issueItemNo : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
         let cid = GetRequestId ctx
         let logger = Logging.log <| ctx.GetLogger()
-        let uploadAttachment = YGI.Storage.uploadAttachment logger projNum
 
-        let toFileUpload (file:IFormFile) = {
-            Id = Guid.NewGuid().ToString()
-            Filename = file.FileName
-            ContentType = file.ContentType
-            Stream = file.OpenReadStream()
-          }
+        let uploadAttachment = YGI.Storage.uploadAttachment logger
+        let createEvent      = YgiEvent.create cid projNum
 
-        let files = ctx.Request.Form.Files |> Seq.map toFileUpload 
+        let toFileStream (file:IFormFile) = {
+          Id            = Guid.NewGuid().ToString()
+          ProjectNumber = projNum
+          IssueItemNo   = issueItemNo
+          Filename      = file.FileName
+          ContentType   = file.ContentType
+          Stream        = file.OpenReadStream()
+        } 
 
-        // Needed to do this in a for loop rather than using a map function.
-        // Somehow streams were being read before the previous stream had closed, throwing an exception.
-        for file in files do
-          do! uploadAttachment file
+        /// Convert to domain friendly Attachemnt Stream
+        let files = ctx.Request.Form.Files |> Seq.map toFileStream 
 
-        return! (Successful.OK "") next ctx
-      }
+        /// Upload each attachment
+        let! attachmentDetailsLst =  
+          /// Needed to do this in a for loop rather than using a map function.
+          /// Somehow streams were being read before the previous stream had closed, throwing an exception.
+          seq {
+            for file in files do
+              task{
+                return! uploadAttachment file 
+              }
+          } |> Threading.Tasks.Task.WhenAll
+
+        /// Add the details of each uploaded attachment to the project
+        let! resultArr = 
+          taskResult {
+            return! 
+              attachmentDetailsLst 
+              |> Array.map createEvent 
+              |> Array.map (Api.AddAttachment logger projNum)} 
+          |> TaskResult.WhenAll
+          
+        let result = resultArr |> Array.toList |> Result.sequence
+
+        let response =
+          match result with
+          | Result.Ok _ -> (Successful.OK "") next ctx
+          | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+
+        return! response
+       }

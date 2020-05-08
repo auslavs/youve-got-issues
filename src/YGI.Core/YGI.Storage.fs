@@ -122,11 +122,22 @@
       return! updateBlob blob leaseId jsonStr
     }
 
-  let uploadAttachment (logger:Logger) (projNum) (file:FileUpload) =
+  let uploadAttachment (logger:Logger) (file:AttachmentStream) =
     task{
       logger Info <| sprintf "Uploading Attachement: %s - %s" file.Id file.Filename
-      let blob = Constants.projectAttachmentsPath projNum file.Id
-      return! uploadBlob blob file.ContentType file.Stream
+      let blobPath = Constants.projectAttachmentsPath file.ProjectNumber file.Id
+      do! uploadBlob blobPath file.ContentType file.Stream
+
+      let blobDetails : AttachmentDetailsDto = {
+        Id            = file.Id
+        ProjectNumber = file.ProjectNumber
+        IssueItemNo   = file.IssueItemNo
+        Filename      = file.Filename
+        ContentType   = file.ContentType
+        RelativeUrl   = blobPath
+      }
+
+      return blobDetails
     }
 
 
