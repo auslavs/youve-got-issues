@@ -27,6 +27,13 @@
       cursor: pointer;
       float: right;
     }
+
+    ul {
+      list-style-type: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+
   </style>
 </head>
 
@@ -93,6 +100,10 @@
             <dd class="col-lg-9">{{issue.status}}</dd>
             <dt class="col-lg-3">Attachments</dt>
             <dd class="col-lg-9">
+              
+              <ul v-show="issue.attachments.length > 0">
+                <li v-for="att in issue.attachments"> <a v-bind:href="att.relativeUrl | removeProject">{{att.filename}}</a> </li>
+              </ul>
 
               <div v-show="uploadProgressVisible" class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
@@ -100,9 +111,8 @@
                   v-bind:style="{ width: widthPercentage }">
                 </div>
               </div>
-              <br />
 
-              <button type="button" class="btn btn-default btn-sm pull-right" v-on:click="addFiles()">
+              <button type="button" class="btn btn-default btn-sm pull-right" v-on:click="addFiles()" style="margin-top: 1 em;">
                 <i class="fas fa-paperclip"></i><span class="hidden-xs"> Attach Files</span>
               </button>
 

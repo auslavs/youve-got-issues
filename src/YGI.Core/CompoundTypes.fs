@@ -129,6 +129,19 @@
       else 
         Error <| sprintf "Failed to add attchment to Issue: %A, Attachment: %A" issue attachment
 
+    let addAttachments (issue:Issue) (attachments:AttachmentDetails list) =
+
+      let rec loop i aLst =
+        match aLst with
+        | [] -> Ok i
+        | x::xs -> 
+          let result = addAttachment i x
+          match result with 
+          | Ok updatedIssue -> loop updatedIssue xs
+          | Error err -> Error err
+
+      loop issue attachments
+
   module ProjectState =
 
     let toProjectNumberStr (state:ProjectState) = 
@@ -211,19 +224,40 @@
       |> Result.map (addOrReplace state.Issues)
       |> Result.bind (fun newIssuesList -> Ok { state with Issues = newIssuesList } )
 
-    let addAttachment (state:ProjectState) (attachment:AttachmentDetails) =
-      
-      let result = 
-        state.Issues 
-        |> List.tryFind (fun i -> i.ItemNo = attachment.IssueItemNo)
-        |> Option.map (fun i -> Issue.addAttachment i attachment)
-        |> function
-        | Some issueResult -> issueResult
-        | None -> Error <| sprintf "Could not find Issue %i" attachment.IssueItemNo
+    let addAttachments (state:ProjectState) (attachments:AttachmentDetails list) =
 
-      result 
-      |> Result.map (addOrReplace state.Issues)
-      |> Result.bind (fun newIssuesList -> Ok { state with Issues = newIssuesList } )
+      let getItemNo (aLst:AttachmentDetails list) =
+
+        let itemNo = function i -> i.IssueItemNo
+
+        let (|Empty|AllMatch|NoMatch|) (lst:AttachmentDetails list) =
+          if lst.IsEmpty then 
+            Empty
+          elif lst.Length = 1 then AllMatch
+          else
+            let head = lst |> List.head |> itemNo
+            let tail = lst |> List.tail |> List.map itemNo
+            if tail |> List.forall((=) head) then AllMatch else NoMatch
+        
+        match aLst with
+        | Empty  -> Error <| sprintf "Could not find any attachments"
+        | AllMatch -> Ok (aLst |> List.head |> itemNo)
+        | NoMatch -> Error <| sprintf "Attachments must all be for the same issue %A" attachments
+
+      let findIssue itemNo = 
+        state.Issues 
+        |> List.tryFind (fun i -> i.ItemNo = itemNo)
+        |> function
+        | Some issueResult -> Ok issueResult
+        | None -> Error <| sprintf "Could not find Issue %i" itemNo
+
+      result {
+        let! itemNo = getItemNo attachments
+        let! issue = findIssue itemNo
+        let! updatedIssue = Issue.addAttachments issue attachments
+        let  updatedIssuesLst = addOrReplace state.Issues updatedIssue
+        return { state with Issues = updatedIssuesLst }
+      }
 
     let toProjectSummary (state:ProjectState) =
       {

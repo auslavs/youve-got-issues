@@ -3,7 +3,7 @@
   open YGI
   open YGI.Logging
   open YGI.Common
-  open FSharp.Control.Tasks.V2
+  open FSharp.Control.Tasks.V2.ContextSensitive
   open Newtonsoft.Json
   open YGI.Dto
   open System.IO

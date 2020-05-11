@@ -3,7 +3,7 @@
   open YGI.Logging
   open Microsoft.Azure.Storage.Blob
   open Microsoft.Azure.Cosmos.Table
-  open FSharp.Control.Tasks.V2
+  open FSharp.Control.Tasks.V2.ContextSensitive
   open System
   open Microsoft.Azure.Storage
   open System.Text
@@ -28,6 +28,12 @@
       let  table = tableClient.GetTableReference(tableName)
       let! _ = table.CreateIfNotExistsAsync()
       return table
+    }
+
+  let private getBlobLease (blob:CloudBlockBlob) =
+    task {
+      let leaseTime = TimeSpan.FromSeconds 15.0 |> Nullable
+      return! blob.AcquireLeaseAsync(leaseTime)
     }
     
   let private getBlobReference containerId blobName =
@@ -73,8 +79,7 @@
       | true ->
 
         // Lease Blob
-        let leaseTime = TimeSpan.FromSeconds 15.0 |> Nullable
-        let! lease = cloudBlockBlob.AcquireLeaseAsync(leaseTime)
+        let! lease = getBlobLease cloudBlockBlob
 
         // Read Blob
         let! file = cloudBlockBlob.DownloadTextAsync()
@@ -103,7 +108,9 @@
       match exists with
       | false ->
         cloudBlockBlob.Properties.ContentType <- contentType
-        return! cloudBlockBlob.UploadFromStreamAsync(stream)
+        do! cloudBlockBlob.UploadFromStreamAsync(stream)
+        do! stream.DisposeAsync()
+        return ()
       | true -> failwithf "Blob already exists: %s" blobName
     }
 

@@ -131,8 +131,8 @@
         return! result |> TaskResult.ofResult
       }
 
-  type LogAddAttachementEvent = LogEvent<AttachmentDetailsDto>
-  type AddAttachement = ApplyEvent<ProjectState,AttachmentDetailsDto>
+  type LogAddAttachementEvent = LogEvent<AttachmentDetailsDto []>
+  type AddAttachement = ApplyEvent<ProjectState,AttachmentDetailsDto []>
 
   let addAttchmentWorkflow
     (logger : Logger)

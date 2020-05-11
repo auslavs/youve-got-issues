@@ -3,11 +3,18 @@ Vue.config.devtools = true;
 
 $('#project').text(window.location.pathname.substring(1)),
 
-  Vue.filter('formatDate', function (value) {
-    if (value) {
-      return moment(String(value)).format('DD/MM/YYYY')
-    }
-  });
+Vue.filter('formatDate', function (value) {
+  if (value) {
+    return moment(String(value)).format('DD/MM/YYYY')
+  }
+});
+
+Vue.filter('removeProject', function (value) {
+  if (value) {
+    var str = String(value)
+    return str.substring(str.indexOf("/") + 1);
+  }
+});
 
 function toIssueUpdate(issue) {
   var update = {
@@ -79,6 +86,7 @@ new Vue({
         lastChanged: null,
         status: null,
         comments: null,
+        attachments: [],
         vid: null
       },
       issueUpdate:
@@ -128,8 +136,12 @@ new Vue({
       ).then(response => (
         this.uploadProgressVisible = false,
         this.uploadProgress = 0,
-        this.files = []
+        this.files = [],
+        this.loadIssue()
       ))
+      .catch(function (error) {
+        console.log(error)
+      })
     },
     loadIssue: function () {
       axios
@@ -144,6 +156,9 @@ new Vue({
           this.areaList = response.data.areaList,
           this.loading = false
         ))
+        .catch(function (error) {
+          console.log(error)
+        })
     },
     updateIssue: function () {
       axios

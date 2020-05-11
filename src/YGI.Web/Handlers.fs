@@ -8,6 +8,8 @@
   open System
   open System.Threading
   open System.Net.Http
+  open System.IO
+  open Microsoft.AspNetCore.Http.Features
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -113,8 +115,6 @@
         return! response
       }
 
-
-
   let uploadAttachment projNum issueItemNo : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
@@ -124,39 +124,30 @@
         let uploadAttachment = YGI.Storage.uploadAttachment logger
         let createEvent      = YgiEvent.create cid projNum
 
-        let toFileStream (file:IFormFile) = {
-          Id            = Guid.NewGuid().ToString()
-          ProjectNumber = projNum
-          IssueItemNo   = issueItemNo
-          Filename      = file.FileName
-          ContentType   = file.ContentType
-          Stream        = file.OpenReadStream()
-        } 
+        let toFileStream seq (file:IFormFile) = 
+          let stream = new MemoryStream()
+          file.CopyTo(stream)
+          {
+            Seq           = seq
+            Id            = Guid.NewGuid().ToString()
+            ProjectNumber = projNum
+            IssueItemNo   = issueItemNo
+            Filename      = file.FileName
+            ContentType   = file.ContentType
+            Stream        = stream
+          } 
 
         /// Convert to domain friendly Attachemnt Stream
-        let files = ctx.Request.Form.Files |> Seq.toArray |> Array.map toFileStream 
+        let files = ctx.Request.Form.Files |> Seq.mapi (fun i f -> toFileStream i f)
 
         /// Upload each attachment
-        let! attachmentDetailsLst =  
-          /// Needed to do this in a for loop rather than using a map function.
-          /// Somehow streams were being read before the previous stream had closed, throwing an exception.
-          [|
-            for file in files do
-              task {
-                return! uploadAttachment file 
-              }
-          |] |> Threading.Tasks.Task.WhenAll
+        let! uploadDetails = 
+          files
+          |> Seq.map uploadAttachment
+          |> Threading.Tasks.Task.WhenAll
 
-        /// Add the details of each uploaded attachment to the project
-        let! resultArr = 
-          taskResult {
-            return! 
-              attachmentDetailsLst 
-              |> Array.map createEvent 
-              |> Array.map (Api.AddAttachment logger projNum)} 
-          |> TaskResult.WhenAll
-          
-        let result = resultArr |> Array.toList |> Result.sequence
+        let uploadEvent = createEvent uploadDetails
+        let! result = Api.AddAttachments logger projNum uploadEvent
 
         let response =
           match result with
