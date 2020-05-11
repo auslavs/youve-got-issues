@@ -128,7 +128,6 @@
           let stream = new MemoryStream()
           file.CopyTo(stream)
           {
-            Seq           = seq
             Id            = Guid.NewGuid().ToString()
             ProjectNumber = projNum
             IssueItemNo   = issueItemNo
