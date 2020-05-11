@@ -29,6 +29,7 @@ let issue =
     Description  = description
     Comments     = []
     Resolution   = None
+    Attachments  = []
     RaisedBy     = raisedBy
     Status       = Status.Unopened
     Raised       = date
