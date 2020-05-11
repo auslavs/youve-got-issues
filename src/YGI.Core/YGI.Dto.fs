@@ -5,10 +5,12 @@
   open System.IO
 
   type AttachmentStream = {
+    Seq           : int
     Id            : string
     ProjectNumber : string
     IssueItemNo   : int
     Filename      : string
+    Extension     : string
     ContentType   : string
     Stream        : Stream
   }
@@ -18,6 +20,7 @@
     ProjectNumber : string
     IssueItemNo   : int
     Filename      : string
+    Extension     : string
     ContentType   : string
     RelativeUrl   : string
   }
@@ -30,6 +33,7 @@
           ProjectNumber = dto.ProjectNumber
           IssueItemNo   = dto.IssueItemNo
           Filename      = dto.Filename
+          Extension     = dto.Extension
           ContentType   = dto.ContentType
           RelativeUrl   = dto.RelativeUrl
         }
@@ -41,6 +45,7 @@
         ProjectNumber = a.ProjectNumber
         IssueItemNo   = a.IssueItemNo
         Filename      = a.Filename
+        Extension     = a.Extension
         ContentType   = a.ContentType
         RelativeUrl   = a.RelativeUrl
       }

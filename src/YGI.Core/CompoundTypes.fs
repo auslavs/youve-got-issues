@@ -22,6 +22,7 @@
     ProjectNumber : string
     IssueItemNo   : int
     Filename      : string
+    Extension     : string
     ContentType   : string
     RelativeUrl   : string
   }

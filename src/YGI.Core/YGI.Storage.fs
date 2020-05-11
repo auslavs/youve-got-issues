@@ -125,7 +125,7 @@
   let uploadAttachment (logger:Logger) (file:AttachmentStream) =
     task{
       logger Info <| sprintf "Uploading Attachement: %s - %s" file.Id file.Filename
-      let blobPath = Constants.projectAttachmentsPath file.ProjectNumber file.IssueItemNo file.Id
+      let blobPath = Constants.projectAttachmentsPath file.ProjectNumber file.IssueItemNo (file.Id + file.Extension)
       do! uploadBlob blobPath file.ContentType file.Stream
 
       let blobDetails : AttachmentDetailsDto = {
@@ -133,6 +133,7 @@
         ProjectNumber = file.ProjectNumber
         IssueItemNo   = file.IssueItemNo
         Filename      = file.Filename
+        Extension     = file.Extension
         ContentType   = file.ContentType
         RelativeUrl   = blobPath
       }

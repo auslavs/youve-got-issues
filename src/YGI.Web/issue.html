@@ -102,10 +102,12 @@
             <dd class="col-lg-9">
               
               <ul v-show="issue.attachments.length > 0">
-                <li v-for="att in issue.attachments"> <a v-bind:href="att.relativeUrl | removeProject">{{att.filename}}</a> </li>
+                <li v-for="att in issue.attachments">
+                  <a v-bind:href="att.relativeUrl | removeProject" target="_blank">{{att.filename}}</a>
+                </li>
               </ul>
 
-              <div v-show="uploadProgressVisible" class="progress">
+              <div v-show="uploadProgressVisible" class="progress" style="margin-bottom: 1em;">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                   v-bind:aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100"
                   v-bind:style="{ width: widthPercentage }">

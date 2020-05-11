@@ -127,11 +127,14 @@
         let toFileStream seq (file:IFormFile) = 
           let stream = new MemoryStream()
           file.CopyTo(stream)
+          stream.Seek(0L, SeekOrigin.Begin) |> ignore
           {
+            Seq           = seq
             Id            = Guid.NewGuid().ToString()
             ProjectNumber = projNum
             IssueItemNo   = issueItemNo
             Filename      = file.FileName
+            Extension     = Path.GetExtension(file.FileName)
             ContentType   = file.ContentType
             Stream        = stream
           } 
