@@ -187,6 +187,27 @@
         return! response
       }
 
+  let addComment projNum issueNo : HttpHandler =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+      task {
+        let cid = GetRequestId ctx
+        let logger = Logging.log <| ctx.GetLogger()
+        let user = getUserDetails ctx
+        let! dto = ctx.BindJsonAsync<NewCommentDto>()
+
+        let! taskResult = taskResult {
+          let event = YgiEvent.create cid user projNum dto
+          return! Api.AddNewComment logger projNum issueNo event
+        }
+
+        let response =
+          match taskResult with
+          | Ok _ -> (Successful.OK "") next ctx
+          | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+
+        return! response
+      }
+
   let uploadAttachment projNum issueItemNo : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
