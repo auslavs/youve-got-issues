@@ -31,7 +31,8 @@ module App =
 
     choose [
       GET  >=> route "/api/summary" >=> Handlers.getProjectList
-      GET  >=> routef "/api/%s" (fun proj -> Handlers.getProjectIssuesList proj)
+      GET  >=> route "/api/claims" >=> Handlers.getClaims
+      GET  >=> routef "/api/P%s" (fun proj -> Handlers.getProjectIssuesList  ("P" + proj))
       GET  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.getIssueDetail ("P" + proj) id)
       POST >=> routef "/api/P%s" (fun _ -> Handlers.createNewProject)
       POST >=> routef "/api/P%s/issues" (fun proj -> Handlers.createNewIssue ("P" + proj))
