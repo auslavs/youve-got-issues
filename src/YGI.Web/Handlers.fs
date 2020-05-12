@@ -26,23 +26,30 @@
       }
 
   let getUserDetails (ctx : HttpContext) =
-
+    let logger = Logging.log <| ctx.GetLogger()
     let user = ctx.User
     if user = null then failwith "Failed to retrieve user"
 
     try 
-      #if DEBUG
+#if DEBUG
       {
         GivenName = "GivenName"
         Surname   = "Surname"
         Email     = "Email"
         Upn       = "Upn"
       }
-      #else
+#else
       let givenName = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.GivenName)
+      logger Logging.Info <| sprintf "GivenName: %s" givenName.Value
+
       let surname = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.Surname)
+      logger Logging.Info <| sprintf "Surname: %s" surname.Value
+
       let email = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.Email)
+      logger Logging.Info <| sprintf "Email: %s" email.Value
+
       let upn = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.Upn)
+      logger Logging.Info <| sprintf "Upn: %s" upn.Value
     
       {
         GivenName = givenName.Value
@@ -51,12 +58,8 @@
         Upn       = upn.Value
       }
 
-      #endif
+#endif
     with _ -> failwith "User not logged in."
-
-    
-
-    
 
 
   let getClaims =
