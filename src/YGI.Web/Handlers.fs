@@ -3,14 +3,14 @@
   open Microsoft.AspNetCore.Http
   open FSharp.Control.Tasks.V2
   open YGI
+  open YGI.Common
   open YGI.Dto
   open YGI.Events
   open System
-  open System.Threading
-  open System.Net.Http
   open System.IO
-  open Microsoft.AspNetCore.Http.Features
   open System.Text
+  open System.Security.Claims
+  open Newtonsoft.Json
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -24,6 +24,40 @@
         let! summary = Storage.getProjectSummary ()
         return! (Successful.OK summary) next ctx 
       }
+
+  let getUserDetails (ctx : HttpContext) =
+
+    let user = ctx.User
+    if user = null then failwith "Failed to retrieve user"
+
+    try 
+      #if DEBUG
+      {
+        GivenName = "GivenName"
+        Surname   = "Surname"
+        Email     = "Email"
+        Upn       = "Upn"
+      }
+      #else
+      let givenName = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.GivenName)
+      let surname = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.Surname)
+      let email = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.Email)
+      let upn = user.Claims |> Seq.find(fun c -> c.Type = Constants.Claims.Upn)
+    
+      {
+        GivenName = givenName.Value
+        Surname   = surname.Value
+        Email     = email.Value
+        Upn       = upn.Value
+      }
+
+      #endif
+    with _ -> failwith "User not logged in."
+
+    
+
+    
+
 
   let getClaims =
     fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -41,6 +75,19 @@
         logger Logging.Info claims
 
         return! (Successful.OK claims) next ctx 
+      }
+
+  let getUser =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+      task {
+        let logger = Logging.log <| ctx.GetLogger()
+        let user = getUserDetails ctx
+
+        let ygiUserStr = JsonConvert.SerializeObject(user)
+
+        logger Logging.Info ygiUserStr
+
+        return! (Successful.OK user) next ctx 
       }
 
   let getProjectIssuesList proj =
@@ -62,10 +109,11 @@
       task {
         let cid = GetRequestId ctx
         let logger = Logging.log <| ctx.GetLogger()
+        let user = getUserDetails ctx
         let! dto = ctx.BindJsonAsync<NewProjectDto>()
 
         let! taskResult = taskResult {
-          let event = YgiEvent.create cid dto.ProjectNumber dto
+          let event = YgiEvent.create cid user dto.ProjectNumber dto
           return! Api.CreateNewProject logger event
         }
 
@@ -82,10 +130,11 @@
       task {
         let cid = GetRequestId ctx
         let logger = Logging.log <| ctx.GetLogger()
+        let user = getUserDetails ctx
         let! dto = ctx.BindJsonAsync<NewIssueDto>()
 
         let! taskResult = taskResult {
-          let event = YgiEvent.create cid projNum dto
+          let event = YgiEvent.create cid user projNum dto
           return! Api.CreateNewIssue logger projNum event
         }
 
@@ -119,10 +168,11 @@
       task {
         let cid = GetRequestId ctx
         let logger = Logging.log <| ctx.GetLogger()
+        let user = getUserDetails ctx
         let! dto = ctx.BindJsonAsync<IssueUpdateDto>()
 
         let! taskResult = taskResult {
-          let event = YgiEvent.create cid projNum dto
+          let event = YgiEvent.create cid user projNum dto
           return! Api.UpdateIssue logger projNum event
         }
 
@@ -139,9 +189,10 @@
       task {
         let cid = GetRequestId ctx
         let logger = Logging.log <| ctx.GetLogger()
+        let user = getUserDetails ctx
 
         let uploadAttachment = YGI.Storage.uploadAttachment logger
-        let createEvent      = YgiEvent.create cid projNum
+        let createEvent      = YgiEvent.create cid user projNum
 
         let toFileStream seq (file:IFormFile) = 
           let stream = new MemoryStream()

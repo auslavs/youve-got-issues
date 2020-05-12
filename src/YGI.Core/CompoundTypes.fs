@@ -2,8 +2,17 @@
   
   open System
 
+  [<CLIMutable>]
+  type User = {
+    GivenName : string
+    Surname   : string
+    Email     : string
+    Upn       : string
+  } 
+
   type YgiEvent<'T> = {
     Cid           : string
+    User          : User
     ProjectNumber : string
     State         : 'T
   }

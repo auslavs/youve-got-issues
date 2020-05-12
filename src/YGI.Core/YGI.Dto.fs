@@ -15,6 +15,7 @@
     Stream        : Stream
   }
 
+  [<CLIMutable>]
   type AttachmentDetailsDto = {
     Id            : string
     ProjectNumber : string

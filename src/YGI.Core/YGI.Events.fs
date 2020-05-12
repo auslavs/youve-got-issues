@@ -36,5 +36,5 @@
 
   module YgiEvent =
 
-    let create cid projNum state  =
-      { Cid = cid; ProjectNumber = projNum; State = state;  }
+    let create cid user projNum state  =
+      { Cid = cid; User = user; ProjectNumber = projNum; State = state;  }
