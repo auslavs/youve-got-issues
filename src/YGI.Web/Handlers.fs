@@ -10,6 +10,7 @@
   open System.Net.Http
   open System.IO
   open Microsoft.AspNetCore.Http.Features
+  open System.Text
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -22,6 +23,24 @@
       task {
         let! summary = Storage.getProjectSummary ()
         return! (Successful.OK summary) next ctx 
+      }
+
+  let getClaims =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+      task {
+        let logger = Logging.log <| ctx.GetLogger()
+        let user = ctx.User
+
+        if user = null then failwith "Failed to retrieve user"
+
+        let claims : string = 
+            (StringBuilder(), user.Claims)
+            ||> Seq.fold (fun sb claim -> sb.AppendFormat("{0}\t{1}\n", claim.Type, claim.Value ))
+            |> string
+
+        logger Logging.Info claims
+
+        return! (Successful.OK claims) next ctx 
       }
 
   let getProjectIssuesList proj =
