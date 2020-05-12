@@ -9,7 +9,6 @@
   open System
   open System.IO
   open System.Text
-  open System.Security.Claims
   open Newtonsoft.Json
 
   let GetRequestId (ctx : HttpContext) = 
