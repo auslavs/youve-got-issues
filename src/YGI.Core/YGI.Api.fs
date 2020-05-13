@@ -111,6 +111,34 @@
         workflow projNum evt
 
 
+  let private logAddCommentEvent : LogAddNewCommentEvent =
+    fun logger evt () -> 
+      StoreEvent eventsTable AddNewCommentEvent logger evt () |> ignore
+      evt.State
+
+  let private addNewComment issueNo : AddNewComment = 
+    fun (state:ProjectState) (evt:NewCommentDto) -> result {
+      let! newComment = NewCommentDto.toNewComment evt
+      return! ProjectState.addNewComment state issueNo newComment
+      }
+
+  let AddNewComment =
+    fun (logger:Logger) projNum issueNo evt ->
+
+        let addNewComment = addNewComment issueNo
+
+        let workflow = 
+            Implementation.addCommentWorkflow
+              logger
+              logAddCommentEvent
+              leaseProject
+              addNewComment
+              updateProjectState
+              updateProjectSummary
+
+        workflow projNum evt
+
+
   let private getProjectState logger projNum : GetProjectState =
       taskResult {
 

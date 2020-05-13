@@ -99,6 +99,33 @@
         return newState
       }
 
+  type LogAddNewCommentEvent = LogEvent<NewCommentDto>
+  type AddNewComment = ApplyEvent<ProjectState,NewCommentDto>
+
+  let addCommentWorkflow
+    (logger : Logger)
+    (logEvent:LogAddNewCommentEvent)
+    (leaseProjectState:LeaseProjectState)
+    (addComment: AddNewComment)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary: UpdateProjectSummary)
+    =
+
+    fun projNum event -> 
+      taskResult {
+
+        logger Info <| sprintf "Recieved Event:\r\n%A" event
+
+        let eventBody = logEvent logger event ()
+        let! dto, leaseId = leaseProjectState logger projNum () |> TaskResult.ofTask
+        let! currentState = dto |> ProjectStateDto.toProjectState |> TaskResult.ofResult
+        let! newState = addComment currentState eventBody |> TaskResult.ofResult
+        do! updateProjectState logger newState leaseId |> TaskResult.ofTask
+        do! updateProjectSummary logger newState
+
+        return newState
+      }
+
   type GetProjectState = TaskResult<ProjectStateDto,string>
   type CreateIssueDetailViewDto = ProjectStateDto -> Result<IssueDetailViewDto,string>
 

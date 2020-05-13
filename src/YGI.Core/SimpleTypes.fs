@@ -134,6 +134,11 @@
     let create fieldName str = 
         ConstrainedType.createString fieldName String500 500 str
 
+    /// Create an array of String500 from a string array
+    /// Return Error if input is null, empty, or length > 500
+    let createArr fieldName arr = 
+      arr |> Array.map (create fieldName) |> Array.toList |> Result.sequence
+
     /// Create a String500 from a string
     /// Return None if input is null, empty. 
     /// Return error if length > maxLen

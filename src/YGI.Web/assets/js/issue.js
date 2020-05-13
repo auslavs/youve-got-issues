@@ -30,6 +30,11 @@ function toIssueUpdate(issue) {
   return update;
 }
 
+function ToggleNewCommentForm() {
+  $('#new-comment').collapse('toggle');
+  $('#add-new-comment-text').collapse('toggle');
+}
+
 new Vue({
   el: '#breadcrumb',
   data() {
@@ -66,6 +71,8 @@ new Vue({
     return {
       loading: true,
       isEditing: false,
+      isAddingComment: false,
+      newComment: "",
       files: [],
       uploadProgress:0,
       uploadProgressVisible:false,
@@ -85,7 +92,7 @@ new Vue({
         raised: null,
         lastChanged: null,
         status: null,
-        comments: null,
+        comments: [],
         attachments: [],
         vid: null
       },
@@ -107,8 +114,37 @@ new Vue({
       this.isEditing = false,
       this.issueUpdate = toIssueUpdate(this.issue)
     },
+    toggleComment: function (){
+      if (this.isAddingComment) {  
+        this.isAddingComment = false; 
+        this.newComment="";
+        ToggleNewCommentForm();
+      }
+      else {
+        this.isAddingComment = true;
+        ToggleNewCommentForm();
+      }
+
+    },
     addFiles(){
       this.$refs.files.click();
+    },
+    addComment() {
+      let formData = new FormData();
+      formData.append("Comment",this.newComment)
+      axios
+        .post('/api' + this.path +'/addComment', formData)
+        .then(res =>
+          this.loadIssue(),
+          this.newComment = "",
+          this.isAddingComment = false,
+          ToggleNewCommentForm()
+        )
+        .catch(function (error) {
+          console.log(error)
+        })
+
+      
     },
     uploadFiles(){
       this.uploadProgressVisible = true;

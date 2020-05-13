@@ -41,6 +41,7 @@ module App =
         GET  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.getIssueDetail ("P" + proj) id)
         POST >=> routef "/api/P%s" (fun _ -> Handlers.createNewProject)
         POST >=> routef "/api/P%s/issues" (fun proj -> Handlers.createNewIssue ("P" + proj))
+        POST >=> routef "/api/P%s/%i/addComment" (fun (proj,id) -> Handlers.addComment ("P" + proj) id)
         PUT  >=> routef "/api/P%s/%i" (fun (proj,id) -> Handlers.updateIssue ("P" + proj) id)
         PUT  >=> routef "/api/P%s/%i/upload" (fun (proj,id) -> Handlers.uploadAttachment ("P" + proj) id)
       ]

@@ -28,6 +28,12 @@
     member val EventType = "UpdateIssue" with get,set
     member val Event = (JsonConvert.SerializeObject evt) with get,set
 
+  type AddNewCommentEvent(evt:YgiEvent<NewCommentDto>) =
+    inherit TableEntity(evt.ProjectNumber, evt.Cid)
+    new(evt) = AddNewCommentEvent(evt)
+    member val EventType = "AddNewComment" with get,set
+    member val Event = (JsonConvert.SerializeObject evt) with get,set
+
   type AddAttachementEvent(evt:YgiEvent<AttachmentDetailsDto []>) =
     inherit TableEntity(partitionKey=evt.ProjectNumber, rowKey=evt.Cid)
     new(evt) = AddAttachementEvent(evt)
