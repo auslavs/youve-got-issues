@@ -192,7 +192,9 @@
         let cid = GetRequestId ctx
         let logger = Logging.log <| ctx.GetLogger()
         let user = getUserDetails ctx
-        let! dto = ctx.BindJsonAsync<NewCommentDto>()
+        let! dto = ctx.BindFormAsync<NewCommentDto>()
+        let username = sprintf "%s %s" user.GivenName user.Surname
+        let dto = { dto with CommentBy = username}
 
         let! taskResult = taskResult {
           let event = YgiEvent.create cid user projNum dto
@@ -232,7 +234,7 @@
             Stream        = stream
           } 
 
-        /// Convert to domain friendly Attachemnt Stream
+        /// Convert to domain friendly Attachment Stream
         let files = ctx.Request.Form.Files |> Seq.mapi (fun i f -> toFileStream i f)
 
         /// Upload each attachment

@@ -33,7 +33,6 @@
       margin-left: 0;
       padding-left: 0;
     }
-
   </style>
 </head>
 
@@ -87,6 +86,55 @@
           <hr />
           <p>{{issue.description}}</p>
 
+          <div v-show="issue.comments.length > 0">
+            <hr />
+          </div>
+          <div v-for="comment in issue.comments">
+            <p>{{comment.comment}} <span class="text-muted">- {{comment.commentBy}}
+                {{comment.lastChanged | formatDate}}</span> </p>
+            <hr />
+          </div>
+
+          <div id="add-new-comment-text" class="collapse show">
+
+            <p class="text-muted">
+              <a v-on:click="toggleComment()" style="cursor: pointer;">add comment</a>
+            </p>
+          </div>
+
+          <div class="collapse" id="new-comment">
+            <hr />
+            <div class="row">
+              <div class="col-lg-9">
+                <div class="form-group">
+                  <textarea id="newComment" name="newComment" class="form-control" rows="3" maxlength="500"
+                    v-model="newComment"
+                    placeholder="Use comments to add further information to the issue or update progress."
+                    required></textarea>
+                </div>
+              </div>
+
+              <!-- Switch button order when on mobile -->
+              <div class="col-lg-3 d-none d-lg-block">
+                <div class="form-group">
+                  <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-primary"
+                    v-on:click="addComment()">AddComment</button>
+                  <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-secondary"
+                    v-on:click="toggleComment()">Cancel</button>
+                </div>
+              </div>
+              <div class="col-lg-3 d-lg-none">
+                <div class="form-group" style="margin-bottom: 0rem;">
+                  <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-secondary"
+                    v-on:click="toggleComment()">Cancel</button>
+                  <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-primary"
+                    v-on:click="addComment()">AddComment</button>
+                </div>
+              </div>
+            </div>
+            <hr />
+          </div>
+
           <dl class="row">
             <dt class="col-lg-3">Area</dt>
             <dd class="col-lg-9">{{issue.area}}</dd>
@@ -100,7 +148,7 @@
             <dd class="col-lg-9">{{issue.status}}</dd>
             <dt class="col-lg-3">Attachments</dt>
             <dd class="col-lg-9">
-              
+
               <ul v-show="issue.attachments.length > 0">
                 <li v-for="att in issue.attachments">
                   <a v-bind:href="att.relativeUrl | removeProject" target="_blank">{{att.filename}}</a>
@@ -114,7 +162,8 @@
                 </div>
               </div>
 
-              <button type="button" class="btn btn-default btn-sm pull-right" v-on:click="addFiles()" style="margin-top: 1 em;">
+              <button type="button" class="btn btn-default btn-sm pull-right" v-on:click="addFiles()"
+                style="margin-top: 1 em;">
                 <i class="fas fa-paperclip"></i><span class="hidden-xs"> Attach Files</span>
               </button>
 
