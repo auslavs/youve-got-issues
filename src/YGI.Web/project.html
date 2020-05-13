@@ -103,13 +103,12 @@
           <td class="d-none d-md-block">
             <a v-bind:href="path + '/' + issue.itemNo">Status: {{ issue.status }}</a>
           </td>
-          <td class="d-none d-md-block">
+          <td class="d-none d-md-block" v-if="(issue.comments.length > 0) && (issue.attachments.length > 0)">
             <a v-bind:href="path + '/' + issue.itemNo">
-              <i class="far fa-comments"></i>
-              <i class="fas fa-paperclip"></i>
+              <i v-show="issue.comments.length > 0" class="far fa-comments"></i>
+              <i v-show="issue.attachments.length > 0" class="fas fa-paperclip"></i>
             </a>
           </td>
-          <!-- </a> -->
         </tr>
       </tbody>
     </table>
