@@ -2,8 +2,17 @@
   
   open System
 
+  [<CLIMutable>]
+  type User = {
+    GivenName : string
+    Surname   : string
+    Email     : string
+    Upn       : string
+  } 
+
   type YgiEvent<'T> = {
     Cid           : string
+    User          : User
     ProjectNumber : string
     State         : 'T
   }
@@ -27,6 +36,31 @@
     RelativeUrl   : string
   }
 
+  type NewComment = {
+    Comment     : String500
+    CommentBy   : String100
+  }
+
+  type Comment = {
+    ItemNo      : int
+    Comment     : String500
+    CommentBy   : String100
+    Raised      : DateTime
+    LastChanged : DateTime
+    Vid         : Guid
+  }
+
+  module Comment =
+    let create itemNo (nc:NewComment) : Comment =
+      {
+        ItemNo      = itemNo
+        Comment     = nc.Comment
+        CommentBy   = nc.CommentBy
+        Raised      = DateTime.Now
+        LastChanged = DateTime.Now
+        Vid         = Guid.NewGuid()
+      }
+
   type Issue = {
     ItemNo      : int
     Area        : String50
@@ -34,7 +68,7 @@
     IssueType   : String50
     Title       : String100
     Description : String500
-    Comments    : String500 list
+    Comments    : Comment list
     Resolution  : String500 option
     Attachments : AttachmentDetails list
     RaisedBy    : String100
@@ -113,6 +147,22 @@
         }
       else 
         Error <| sprintf "Failed to update Issue: %A, Update: %A" issue update
+
+    let private getNextCommentNumber (commentList:Comment list) =
+      let add1 i = i + 1
+      match commentList with
+      | [] -> 1
+      | lst -> lst |> List.map (fun i -> i.ItemNo) |> List.max |> add1
+
+    let addComment (issue:Issue) (comment:NewComment) =
+
+      /// Create a new comment
+      let newCommentNum = getNextCommentNumber issue.Comments  
+      let newComment = comment |> Comment.create newCommentNum
+
+      /// Append it to the comment list and return
+      let newCommentsLst = (newComment::issue.Comments) |> List.sortBy (fun i -> i.ItemNo)
+      { issue with Comments = newCommentsLst }
 
     let addAttachment (issue:Issue) (attachment:AttachmentDetails) =
       if issue.ItemNo = attachment.IssueItemNo then
@@ -225,12 +275,29 @@
       |> Result.map (addOrReplace state.Issues)
       |> Result.bind (fun newIssuesList -> Ok { state with Issues = newIssuesList } )
 
+    let addNewComment (state:ProjectState) issueNo (comment:NewComment) =
+      
+      let result = 
+        state.Issues 
+        |> List.tryFind (fun i -> i.ItemNo = issueNo)
+        |> Option.map (fun i -> Issue.addComment i comment)
+        |> function
+        | Some issueResult -> Ok issueResult
+        | None -> Error <| sprintf "Could not find Issue %i to add comment" issueNo
+
+      result 
+      |> Result.map (addOrReplace state.Issues)
+      |> Result.bind (fun newIssuesList -> Ok { state with Issues = newIssuesList } )
+
+
     let addAttachments (state:ProjectState) (attachments:AttachmentDetails list) =
 
+      /// Retrieve the Item No. of the issue we want to update
       let getItemNo (aLst:AttachmentDetails list) =
 
         let itemNo = function i -> i.IssueItemNo
 
+        /// Helper pattern to check that all attachments are for the same issue
         let (|Empty|AllMatch|NoMatch|) (lst:AttachmentDetails list) =
           if lst.IsEmpty then 
             Empty
@@ -240,11 +307,13 @@
             let tail = lst |> List.tail |> List.map itemNo
             if tail |> List.forall((=) head) then AllMatch else NoMatch
         
+        /// Checking that all attachments are for the same issue
         match aLst with
         | Empty  -> Error <| sprintf "Could not find any attachments"
         | AllMatch -> Ok (aLst |> List.head |> itemNo)
         | NoMatch -> Error <| sprintf "Attachments must all be for the same issue %A" attachments
 
+      /// Find the issue we want to update
       let findIssue itemNo = 
         state.Issues 
         |> List.tryFind (fun i -> i.ItemNo = itemNo)
@@ -252,6 +321,7 @@
         | Some issueResult -> Ok issueResult
         | None -> Error <| sprintf "Could not find Issue %i" itemNo
 
+      /// Update and return the project state with an updated issues list
       result {
         let! itemNo = getItemNo attachments
         let! issue = findIssue itemNo

@@ -15,6 +15,7 @@
     Stream        : Stream
   }
 
+  [<CLIMutable>]
   type AttachmentDetailsDto = {
     Id            : string
     ProjectNumber : string
@@ -38,6 +39,11 @@
           RelativeUrl   = dto.RelativeUrl
         }
       }
+
+    let toAttachmentDetailsArray (arr: AttachmentDetailsDto[]) = 
+      match arr with
+      | null -> Ok []
+      | _ -> arr |> Array.map toAttachmentDetails |> Array.toList |> Result.sequence
 
     let fromAttachmentDetails (a:AttachmentDetails) : AttachmentDetailsDto = 
       {
@@ -84,6 +90,71 @@
         return domainObj
       }
 
+  [<CLIMutable>]
+  type NewCommentDto = {
+    Comment     : string
+    CommentBy   : string
+  }
+
+  module internal NewCommentDto =
+
+    let toNewComment (dto:NewCommentDto) : Result<NewComment,string> =
+      result {
+
+        let! comment   = String500.create "Comments" dto.Comment
+        let! commentBy = String100.create "CommentBy" dto.CommentBy
+
+        return 
+          {
+            Comment     = comment
+            CommentBy   = commentBy
+          }
+      }
+
+  [<CLIMutable>]
+  type CommentDto = {
+    ItemNo      : int
+    Comment     : string
+    CommentBy   : string
+    Raised      : DateTime
+    LastChanged : DateTime
+    Vid         : Guid
+  }
+
+  module internal CommentDto =
+
+    let toComment (dto:CommentDto) : Result<Comment,string> =
+      result {
+
+        let! comment   = String500.create "Comments" dto.Comment
+        let! commentBy = String100.create "RaisedBy" dto.CommentBy
+
+        return 
+          {
+            ItemNo      = dto.ItemNo
+            Comment     = comment
+            CommentBy   = commentBy
+            Raised      = dto.Raised
+            LastChanged = dto.LastChanged
+            Vid         = dto.Vid
+          }
+      }
+
+    let fromComment (c:Comment) : CommentDto = 
+      {
+        ItemNo      = c.ItemNo
+        Comment     = String500.value c.Comment
+        CommentBy   = String100.value c.CommentBy
+        Raised      = c.Raised
+        LastChanged = c.LastChanged
+        Vid         = c.Vid
+      }
+
+    let toCommentArray (arr:CommentDto[]) = 
+      match arr with
+      | null -> Ok []
+      | _ -> arr |> Array.map toComment |> Array.toList |> Result.sequence
+
   
   [<CLIMutable>]
   type IssueDto = {
@@ -93,7 +164,7 @@
     IssueType   : string
     Title       : string
     Description : string
-    Comments    : string []
+    Comments    : CommentDto []
     Resolution  : string
     Attachments : AttachmentDetailsDto []
     RaisedBy    : string
@@ -106,25 +177,17 @@
 
   module internal IssueDto =
 
-    let toIssue (dto:IssueDto) : Result<Issue,string> =     
+    let toIssue (dto:IssueDto) : Result<Issue,string> =
       result {
-
-        let string500ArrayHelper fieldName arr = 
-          arr |> Array.map (String500.create fieldName) |> Array.toList |> Result.sequence
-
-        let attachmentArrayHelper arr = 
-          match arr with
-          | null -> Ok []
-          | _ -> arr |> Array.map (AttachmentDetailsDto.toAttachmentDetails) |> Array.toList |> Result.sequence
 
         let! area        = String50.create "Area" dto.Area
         let! equip       = String50.create "Equipment" dto.Equipment
         let! issueType   = String50.create "IssueType" dto.IssueType
         let! title       = String100.create "Title" dto.Title
         let! description = String500.create "Description" dto.Description
-        let! comments    = string500ArrayHelper "Comments" dto.Comments
+        let! comments    = CommentDto.toCommentArray dto.Comments 
         let! resolution  = String500.createOption "Resolution" dto.Resolution
-        let! attachments = attachmentArrayHelper dto.Attachments
+        let! attachments = AttachmentDetailsDto.toAttachmentDetailsArray dto.Attachments
         let! raisedBy    = String100.create "RaisedBy" dto.RaisedBy
         let! status      = Status.fromStr dto.Status
 
@@ -155,7 +218,7 @@
       IssueType   = String50.value i.IssueType
       Title       = String100.value i.Title
       Description = String500.value i.Description
-      Comments    = i.Comments |> List.map String500.value |> List.toArray
+      Comments    = i.Comments |> List.map CommentDto.fromComment |> List.toArray
       Resolution  = i.Resolution |> Option.map String500.value |> Option.defaultValue ""
       Attachments = i.Attachments |> List.map AttachmentDetailsDto.fromAttachmentDetails |> List.toArray
       RaisedBy    = String100.value i.RaisedBy

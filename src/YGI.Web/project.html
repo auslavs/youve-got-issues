@@ -128,18 +128,20 @@
 
               <div class="form-group">
                 <label for="title">Title</label>
-                <input id="title" name="Title" v-model="newIssue.Title" class="form-control" type="text" required />
+                <input id="title" name="Title" v-model="newIssue.Title" class="form-control" type="text"
+                  placeholder="What's been observed. Be specific." required />
               </div>
 
               <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" name="Description" v-model="newIssue.Description" class="form-control"
-                  rows="5" maxlength="500" required></textarea>
+                  rows="5" maxlength="500" placeholder="Add a description to help others understand the observation."></textarea>
               </div>
 
               <div class="form-group">
                 <label for="area">Area</label>
                 <input id="area" name="Area" v-model="newIssue.Area" class="form-control" list="area-lst" type="text"
+                  placeholder="e.g. Project Management, Controls, Software"
                   required>
                 <datalist id="area-lst">
                   <option v-for="area in areaList">
@@ -151,6 +153,7 @@
               <div class="form-group">
                 <label for="equipment">Equipment</label>
                 <input id="equipment" name="Equipment" v-model="newIssue.Equipment" class="form-control"
+                  placeholder="e.g. Carton Lidder"
                   list="equipment-lst" type="text" required />
                 <datalist id="equipment-lst">
                   <option v-for="equipment in equipmentTypes">
@@ -172,7 +175,7 @@
               <div class="form-group">
                 <label for="raised-by">Raised By</label>
                 <input id="raised-by" name="RaisedBy" v-model="newIssue.RaisedBy" class="form-control" type="text"
-                  required />
+                  placeholder="Who made the observation." required />
               </div>
             </div>
 
