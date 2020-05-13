@@ -103,7 +103,7 @@
           </div>
 
           <div class="collapse" id="new-comment">
-            <hr />
+            <hr v-if="issue.comments.length = 0" />
             <div class="row">
               <div class="col-lg-9">
                 <div class="form-group">
