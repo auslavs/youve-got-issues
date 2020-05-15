@@ -96,11 +96,11 @@
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
           let logger = Logging.log <| ctx.GetLogger()
-          let! summary = Storage.getProject logger proj ()
-
-          match summary with 
+          let! state = Storage.getProject logger proj ()
+          let updateStatus (s:ProjectStateDto) = { s with StatusTypes = Status.statusOptions |> List.toArray }
+          match state with 
           | Some s -> 
-            return! (Successful.OK s) next ctx 
+            return! (Successful.OK (updateStatus s)) next ctx 
           | None -> 
             let response = RequestErrors.NOT_FOUND "Page not found"
             return! response next ctx            

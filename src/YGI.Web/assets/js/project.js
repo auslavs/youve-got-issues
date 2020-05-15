@@ -1,12 +1,12 @@
 Vue.config.devtools = true;
 
-$('#current-page').text(window.location.pathname.substring(1)),
+$('#current-page').text(window.location.pathname.substring(1));
 
-  Vue.filter('formatDate', function (value) {
-    if (value) {
-      return moment(String(value)).format('DD/MM/YYYY')
-    }
-  });
+Vue.filter('formatDate', function (value) {
+  if (value) {
+    return moment(String(value)).format('DD/MM/YYYY')
+  }
+});
 
 new Vue({
   el: '#issues-list',
@@ -18,6 +18,7 @@ new Vue({
       issueTypes: null,
       equipmentTypes: null,
       areaList: null,
+      statusTypes:null,
       path: window.location.pathname,
       newIssue: {
         Area: null,
@@ -37,10 +38,30 @@ new Vue({
           this.model = response.data,
           this.issues = response.data.issues,
           this.issueTypes = response.data.issueTypes,
+          this.statusTypes = response.data.statusTypes,
           this.equipmentTypes = response.data.equipmentTypes,
           this.areaList = response.data.areaList,
-          this.loading = false
+          this.loading = false,
+          this.UpdatePicker("#area-picker", response.data.areaList),
+          this.UpdatePicker("#equipment-picker", response.data.equipmentTypes),
+          this.UpdatePicker("#issue-picker", response.data.issueTypes),
+          this.UpdatePicker("#status-picker", response.data.statusTypes)
         ))
+    },
+    UpdatePicker: function (picker,options) {
+      var $el = $(picker);
+      $el.empty();
+      $.each(options, function(key,value) {
+        $el.append($("<option></option>")
+          .attr("value", value).text(value));
+      });
+      $el.selectpicker('refresh').trigger('change');
+    },
+    onPickerChange: function (event) {
+      var $el = $(event.target);
+      var selected = $el.selectpicker().selectedOptions
+      console.log(selected);
+      console.log(event.target.value);
     },
     submitIssue: function () {
       axios
