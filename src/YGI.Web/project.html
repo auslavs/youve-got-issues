@@ -89,19 +89,20 @@
             <li class="list-group-item">
               <span>Area</span>
               <br />
-              <select id="area-picker" class="selectpicker" multiple></select>
+              <!-- <select id="area-picker" @change="onPickerChange('area',$event)" class="selectpicker" v-model="areaFilter" multiple></select> -->
+              <select id="area-picker" @change="onPickerChange('area',$event)" class="selectpicker" v-model="areaFilter" multiple></select>
             </li>
             <li class="list-group-item">
               <span>Equipment</span>
-              <select id="equipment-picker" class="selectpicker" multiple></select>
+              <select id="equipment-picker" @change="onPickerChange('equipment',$event)" class="selectpicker" v-model="equipmentFilter" multiple></select>
             </li>
             <li class="list-group-item">
-              <span>Issue Types</span>
-              <select id="issue-picker" @change="onPickerChange($event)" class="selectpicker" multiple></select>
+              <span>Type</span>
+              <select id="issue-picker" @change="onPickerChange('issue',$event)" class="selectpicker" v-model="issueFilter" multiple></select>
             </li>
             <li class="list-group-item">
               <span>Status</span>
-              <select id="status-picker" class="selectpicker" multiple></select>
+              <select id="status-picker" @change="onPickerChange('status',$event)" class="selectpicker" v-model="statusFilter" multiple></select>
             </li>
           </ul>
 
@@ -123,7 +124,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="issue in issues" :key="issue.ItemNo">
+              <tr v-show="issue.show" v-for="issue in issues" :key="issue.ItemNo">
                 <td scope="row">
                   <a v-bind:href="path + '/' + issue.itemNo">{{ issue.itemNo }}</a>
                 </td>

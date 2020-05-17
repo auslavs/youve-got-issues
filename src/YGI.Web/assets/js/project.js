@@ -18,6 +18,10 @@ new Vue({
       issueTypes: null,
       equipmentTypes: null,
       areaList: null,
+      areaFilter: [],
+      equipmentFilter: [],
+      issueFilter: [],
+      statusFilter: [],
       statusTypes:null,
       path: window.location.pathname,
       newIssue: {
@@ -45,23 +49,64 @@ new Vue({
           this.UpdatePicker("#area-picker", response.data.areaList),
           this.UpdatePicker("#equipment-picker", response.data.equipmentTypes),
           this.UpdatePicker("#issue-picker", response.data.issueTypes),
-          this.UpdatePicker("#status-picker", response.data.statusTypes)
+          this.UpdatePicker("#status-picker", response.data.statusTypes),
+          this.ShowAllIssues()
         ))
+    },
+    ShowAllIssues: function() {
+      this.issues.forEach(function (issue) { issue['show'] = true;});
     },
     UpdatePicker: function (picker,options) {
       var $el = $(picker);
       $el.empty();
       $.each(options, function(key,value) {
         $el.append($("<option></option>")
-          .attr("value", value).text(value));
+           .attr("value", value).text(value));
       });
       $el.selectpicker('refresh').trigger('change');
     },
-    onPickerChange: function (event) {
-      var $el = $(event.target);
-      var selected = $el.selectpicker().selectedOptions
-      console.log(selected);
-      console.log(event.target.value);
+    onPickerChange: function (id,event) {
+      var $picker = $(event.target);
+      var selected = $picker.selectpicker().val()
+
+      if (selected.length == 0) { 
+        this.issues.forEach(function (issue) { issue.show = true }); 
+        return;
+      };
+
+      function isMatch (value) {
+        var result = selected.some(element => element === value);
+        return result;
+      }
+
+      switch(id) {
+        case "area":
+          this.issues.forEach(function (issue) { 
+            if (isMatch(issue.area)) { issue.show = true; }
+            else { issue.show = false; }
+          });
+          break;
+        case "equipment":
+          this.issues.forEach(function (issue) { 
+            if (isMatch(issue.equipment)) { issue.show = true; }
+            else { issue.show = false; }
+          });
+          break;
+        case "issue":
+          this.issues.forEach(function (issue) { 
+            if (isMatch(issue.issueType)) { issue.show = true; }
+            else { issue.show = false; }
+          });
+          break;
+        case "status":
+          this.issues.forEach(function (issue) { 
+            if (isMatch(issue.status)) { issue.show = true; }
+            else { issue.show = false; }
+          });
+          break;
+        default:
+          break;
+      }
     },
     submitIssue: function () {
       axios
