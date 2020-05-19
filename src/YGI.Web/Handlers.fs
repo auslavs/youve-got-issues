@@ -10,6 +10,8 @@
   open System.IO
   open System.Text
   open Newtonsoft.Json
+  open Microsoft.AspNetCore.Mvc
+  open Microsoft.Extensions.Primitives
 
   let GetRequestId (ctx : HttpContext) = 
     let result,cid = ctx.Items.TryGetValue "MS_AzureFunctionsRequestID"
@@ -253,3 +255,27 @@
 
         return! response
        }
+
+  let getSheet : HttpHandler =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+      task {
+
+        let stream,bytes = ExcelExport.Export ()
+        //let res = Encoding.UTF8.GetString(stream.GetBuffer(), 0 , (int)stream.Length)
+
+        let contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+        let headers = 
+          dict [
+            "Content-Disposition", StringValues("attachment");
+            "filename",  StringValues("excel_file.xlsx") ]
+
+        ctx.Response.ContentType <- contentType
+        headers |> Seq.iter ctx.Response.Headers.Add
+        ctx.Response.ContentLength <- bytes.Length |> int64 |> Nullable
+
+        //let x = text res
+
+        //return! (Successful.ok x) next ctx
+        return! ctx.WriteBytesAsync (bytes)
+      }

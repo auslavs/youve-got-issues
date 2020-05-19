@@ -34,6 +34,7 @@ module App =
   let app : HttpHandler =
     mustBeLoggedIn >=>
       choose [
+        GET  >=> route "/sheet" >=> Handlers.getSheet
         GET  >=> route "/api/summary" >=> Handlers.getProjectList
         GET  >=> route "/api/claims" >=> Handlers.getClaims
         GET  >=> route "/api/user" >=> Handlers.getUser
