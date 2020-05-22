@@ -103,7 +103,7 @@
           </div>
 
           <div class="collapse" id="new-comment">
-            <hr />
+            <hr v-if="issue.comments.length = 0" />
             <div class="row">
               <div class="col-lg-9">
                 <div class="form-group">
@@ -118,7 +118,7 @@
               <div class="col-lg-3 d-none d-lg-block">
                 <div class="form-group">
                   <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-primary"
-                    v-on:click="addComment()">AddComment</button>
+                    v-on:click="addComment()">Add Comment</button>
                   <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-secondary"
                     v-on:click="toggleComment()">Cancel</button>
                 </div>
@@ -128,7 +128,7 @@
                   <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-secondary"
                     v-on:click="toggleComment()">Cancel</button>
                   <button type="button" style="margin-top: 3px; margin-bottom: 3px;" class="btn btn-primary"
-                    v-on:click="addComment()">AddComment</button>
+                    v-on:click="addComment()">Add Comment</button>
                 </div>
               </div>
             </div>

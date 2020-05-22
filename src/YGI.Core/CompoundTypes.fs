@@ -217,7 +217,7 @@
       issuesList |> List.map (fun i -> i.Area) |> distinctAndSort
 
     let private getEquipmentList (issuesList:Issue list) =
-      issuesList |> List.map (fun i -> i.Area) |> distinctAndSort
+      issuesList |> List.map (fun i -> i.Equipment) |> distinctAndSort
 
     let private getIssueTypesList (issuesList:Issue list) =
       let lst1 = issuesList |> List.map (fun i -> i.IssueType) |> List.distinct

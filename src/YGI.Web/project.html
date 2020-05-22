@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css"
+    crossorigin="anonymous">
 
   <title>You&#39;ve Got Issues</title>
   <style>
@@ -21,6 +23,30 @@
     td :hover {
       color: #212529;
       text-decoration: none;
+    }
+
+    /* table.center {
+      margin-left:auto; 
+      margin-right:auto;
+    } */
+    table tr:first-child td {
+      border-top: 0px;
+    }
+
+    .list-group-item {
+      margin-left: 0em;
+      padding-left: 0em;
+    }
+
+    .sidebar {
+      -ms-flex: 0 0 230px;
+      flex: 0 0 230px;
+    }
+
+    @media (max-width: 690px) {
+      .sidebar {
+        display: none;
+      }
     }
   </style>
 
@@ -54,65 +80,97 @@
     </div>
     <p></p>
 
-    <div v-show="loading" style="text-align: center; font-size: 0.5rem; color: #e9ecef;">
-      <i class="fas fa-spinner fa-pulse fa-10x mr-3"></i>
-    </div>
 
-    <table v-cloak v-show="!loading" class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th scope="col" class="" style="width: 30px;">#</th>
-          <th scope="col" class="">Area</th>
-          <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Equipment</th>
-          <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Issue Type</th>
-          <th scope="col">Issue</th>
-          <th scope="col" class="d-none d-md-table-cell" style="width: 200px;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="issue in issues" :key="issue.ItemNo">
-          <!-- <a v-bind:href="path + '/' + issue.itemNo"> -->
-          <td scope="row">
-            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.itemNo }}</a>
-          </td>
-          <td scope="row">
-            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.area }}</a>
-          </td>
-          <td scope="row" class="d-none d-lg-table-cell"><a
-              v-bind:href="path + '/' + issue.itemNo">{{ issue.equipment }}</a></td>
-          <td scope="row" class="d-none d-lg-table-cell">
-            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.issueType }}</a>
-          </td>
-          <td scope="row" class="d-lg-none">
-            <a v-bind:href="path + '/' + issue.itemNo">{{ issue.title }}</a>
-          </td>
-          <td scope="row" class="d-none d-lg-table-cell">
-            <a v-bind:href="path + '/' + issue.itemNo">
-              <h5>{{ issue.title }}</h5>
-              {{ issue.description }}
-            </a>
-          </td>
-          <td class="d-none d-md-block">
-            <a v-bind:href="path + '/' + issue.itemNo">Raised By: {{ issue.raisedBy }}</a>
-          </td>
-          <td class="d-none d-md-block">
-            <a v-bind:href="path + '/' + issue.itemNo">Raised: {{ issue.raised | formatDate }}</a></td>
-          <td class="d-none d-md-block">
-            <a v-bind:href="path + '/' + issue.itemNo">Last Changed: {{ issue.lastChanged | formatDate }}</a>
-          </td>
-          <td class="d-none d-md-block">
-            <a v-bind:href="path + '/' + issue.itemNo">Status: {{ issue.status }}</a>
-          </td>
-          <td class="d-none d-md-block">
-            <a v-bind:href="path + '/' + issue.itemNo">
-              <i class="far fa-comments"></i>
-              <i class="fas fa-paperclip"></i>
-            </a>
-          </td>
-          <!-- </a> -->
-        </tr>
-      </tbody>
-    </table>
+    <div id="main-content" class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col d-none d-lg-block sidebar">
+
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <span>Area</span>
+              <br />
+              <!-- <select id="area-picker" @change="onPickerChange('area',$event)" class="selectpicker" v-model="areaFilter" multiple></select> -->
+              <select id="area-picker" @change="onPickerChange('area',$event)" class="selectpicker" v-model="areaFilter" multiple></select>
+            </li>
+            <li class="list-group-item">
+              <span>Equipment</span>
+              <select id="equipment-picker" @change="onPickerChange('equipment',$event)" class="selectpicker" v-model="equipmentFilter" multiple></select>
+            </li>
+            <li class="list-group-item">
+              <span>Type</span>
+              <select id="issue-picker" @change="onPickerChange('issue',$event)" class="selectpicker" v-model="issueFilter" multiple></select>
+            </li>
+            <li class="list-group-item">
+              <span>Status</span>
+              <select id="status-picker" @change="onPickerChange('status',$event)" class="selectpicker" v-model="statusFilter" multiple></select>
+            </li>
+            <li class="list-group-item">
+              <a v-bind:href="'/api' + this.path +'/export'">Export</a>
+            </li>
+          </ul>
+
+        </div>
+        <div class="col">
+          <div v-show="loading" style="text-align: center; font-size: 0.5rem; color: #e9ecef;">
+            <i class="fas fa-spinner fa-pulse fa-10x mr-3"></i>
+          </div>
+
+          <table v-cloak v-show="!loading" class="table table-hover table-sm">
+            <thead>
+              <tr>
+                <th scope="col" class="" style="width: 30px;">#</th>
+                <th scope="col" class="">Area</th>
+                <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Equipment</th>
+                <th scope="col" class="d-none d-lg-table-cell" style="width: 130px;">Issue Type</th>
+                <th scope="col">Issue</th>
+                <th scope="col" class="d-none d-md-table-cell" style="width: 200px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-show="issue.show" v-for="issue in issues" :key="issue.ItemNo">
+                <td scope="row">
+                  <a v-bind:href="path + '/' + issue.itemNo">{{ issue.itemNo }}</a>
+                </td>
+                <td scope="row">
+                  <a v-bind:href="path + '/' + issue.itemNo">{{ issue.area }}</a>
+                </td>
+                <td scope="row" class="d-none d-lg-table-cell"><a
+                    v-bind:href="path + '/' + issue.itemNo">{{ issue.equipment }}</a></td>
+                <td scope="row" class="d-none d-lg-table-cell">
+                  <a v-bind:href="path + '/' + issue.itemNo">{{ issue.issueType }}</a>
+                </td>
+                <td scope="row" class="d-lg-none">
+                  <a v-bind:href="path + '/' + issue.itemNo">{{ issue.title }}</a>
+                </td>
+                <td scope="row" class="d-none d-lg-table-cell">
+                  <a v-bind:href="path + '/' + issue.itemNo">
+                    <h5>{{ issue.title }}</h5>
+                    {{ issue.description }}
+                  </a>
+                </td>
+                <td class="d-none d-md-block">
+                  <a v-bind:href="path + '/' + issue.itemNo">Raised By: {{ issue.raisedBy }}</a>
+                </td>
+                <td class="d-none d-md-block">
+                  <a v-bind:href="path + '/' + issue.itemNo">Raised: {{ issue.raised | formatDate }}</a></td>
+                <td class="d-none d-md-block">
+                  <a v-bind:href="path + '/' + issue.itemNo">Last Changed: {{ issue.lastChanged | formatDate }}</a>
+                </td>
+                <td class="d-none d-md-block">
+                  <a v-bind:href="path + '/' + issue.itemNo">Status: {{ issue.status }}</a>
+                </td>
+                <td class="d-none d-md-block" v-if="(issue.comments.length > 0) || (issue.attachments.length > 0)">
+                  <a v-bind:href="path + '/' + issue.itemNo">
+                    <i v-show="issue.comments.length > 0" class="far fa-comments"></i>
+                    <i v-show="issue.attachments.length > 0" class="fas fa-paperclip"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <div class="modal fade" id="new-issue-modal" tabindex="-1" aria-roledescription="dialog" aria-labelledby="New Issue"
       aria-hidden="true">
@@ -135,14 +193,14 @@
               <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" name="Description" v-model="newIssue.Description" class="form-control"
-                  rows="5" maxlength="500" placeholder="Add a description to help others understand the observation."></textarea>
+                  rows="5" maxlength="500"
+                  placeholder="Add a description to help others understand the observation."></textarea>
               </div>
 
               <div class="form-group">
                 <label for="area">Area</label>
                 <input id="area" name="Area" v-model="newIssue.Area" class="form-control" list="area-lst" type="text"
-                  placeholder="e.g. Project Management, Controls, Software"
-                  required>
+                  placeholder="e.g. Project Management, Controls, Software" required>
                 <datalist id="area-lst">
                   <option v-for="area in areaList">
                     {{ area }}
@@ -153,8 +211,7 @@
               <div class="form-group">
                 <label for="equipment">Equipment</label>
                 <input id="equipment" name="Equipment" v-model="newIssue.Equipment" class="form-control"
-                  placeholder="e.g. Carton Lidder"
-                  list="equipment-lst" type="text" required />
+                  placeholder="e.g. Carton Lidder" list="equipment-lst" type="text" required />
                 <datalist id="equipment-lst">
                   <option v-for="equipment in equipmentTypes">
                     {{ equipment }}
@@ -201,6 +258,8 @@
     crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
     integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"
     crossorigin="anonymous"></script>
   <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
     crossorigin="anonymous"></script>

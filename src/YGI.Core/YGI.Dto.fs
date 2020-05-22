@@ -265,6 +265,7 @@
     AreaList       : string []
     EquipmentTypes : string [] 
     IssueTypes     : string []
+    StatusTypes    : string[]
     Issues         : IssueDto []
     LastChanged    : DateTime
     Vid            : Guid
@@ -309,6 +310,7 @@
         AreaList       = state.AreaList |> List.map String50.value |> List.toArray
         EquipmentTypes = state.EquipmentTypes |> List.map String50.value |> List.toArray
         IssueTypes     = state.IssueTypes |> List.map String50.value |> List.toArray
+        StatusTypes    = Status.statusOptions |> List.toArray
         Issues         = state.Issues |> List.map IssueDto.fromIssue |> List.toArray
         LastChanged    = state.LastChanged
         Vid            = state.Vid
