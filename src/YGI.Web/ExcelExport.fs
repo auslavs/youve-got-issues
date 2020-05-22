@@ -12,7 +12,7 @@
   let private ``2u`` = UInt32Value(2u)
 
 
-  let DefaultFonts = 
+  let DefaultFonts () = 
     
     let fonts0 = new Fonts()
     fonts0.Count <- ``1u``
@@ -36,7 +36,7 @@
     fonts0.Append(font0 :> OpenXmlElement)
     fonts0
 
-  let DefaultFills =
+  let DefaultFills () =
     let fills = new Fills()
     fills.Count <- ``2u``
 
@@ -54,7 +54,7 @@
     fills.Append(fill1 :> OpenXmlElement)
     fills
 
-  let DefaultBorders =
+  let DefaultBorders () =
     let borders = new Borders()
     borders.Count <- ``1u``
     let border0 = new Border()
@@ -73,7 +73,7 @@
     borders.Append(border0 :> OpenXmlElement);
     borders
     
-  let DefaultCellStyleFormats =
+  let DefaultCellStyleFormats () =
     let cellStyleFormats = new CellStyleFormats()
     cellStyleFormats.Count <- ``1u``
     
@@ -86,7 +86,7 @@
     cellStyleFormats.Append(cellFormat0 :> OpenXmlElement);
     cellStyleFormats
 
-  let DefaultCellFormats =
+  let DefaultCellFormats () =
     let cellFormats = new CellFormats()
     cellFormats.Count <- ``2u``
 
@@ -118,18 +118,18 @@
 
     cellFormats
 
-  let GenerateWorkbookStylesPartContent( stylesPart : inref<WorkbookStylesPart>) =
+  let GenerateWorkbookStylesPartContent (stylesPart : inref<WorkbookStylesPart>) () =
     
     let stylesheet = new Stylesheet()
-    stylesheet.Append(DefaultFonts :> OpenXmlElement)
-    stylesheet.Append(DefaultFills :> OpenXmlElement)
-    stylesheet.Append(DefaultBorders :> OpenXmlElement)
-    stylesheet.Append(DefaultCellStyleFormats :> OpenXmlElement)
-    stylesheet.Append(DefaultCellFormats :> OpenXmlElement)
+    stylesheet.Append(DefaultFonts () :> OpenXmlElement)
+    stylesheet.Append(DefaultFills () :> OpenXmlElement)
+    stylesheet.Append(DefaultBorders () :> OpenXmlElement)
+    stylesheet.Append(DefaultCellStyleFormats () :> OpenXmlElement)
+    stylesheet.Append(DefaultCellFormats () :> OpenXmlElement)
     stylesPart.Stylesheet <- stylesheet
     stylesPart.Stylesheet.Save()
 
-  let DefaultColumns =
+  let DefaultColumns () =
     let columns = new Columns();
 
     let column (index:int) (width:float) = 
@@ -180,17 +180,13 @@
     do  sheet.SheetId <- UInt32Value.FromUInt32(doc.WorkbookPart.Workbook.Sheets.ChildElements.Count + 1 |> uint32)
     do  sheet.Name <- projNo |> StringValue
 
-    do logger Info "Before Style Sheet"
-
     // Add Stylesheet
     let workbookStylesPart : WorkbookStylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-    do GenerateWorkbookStylesPartContent &workbookStylesPart
+    do GenerateWorkbookStylesPartContent &workbookStylesPart ()
     do workbookStylesPart.Stylesheet.Save()
 
-    do logger Info "After Style Sheet"
-
     // Add Columns
-    let _ = worksheetPart.Worksheet.InsertAt(DefaultColumns :> OpenXmlElement, 0)
+    let _ = worksheetPart.Worksheet.InsertAt(DefaultColumns () :> OpenXmlElement, 0)
 
     do  doc.WorkbookPart.Workbook.Save()
 
@@ -244,8 +240,6 @@
 
       issue.Comments |> Array.iter addComment
 
-      
-
     interface IDisposable with 
       member __.Dispose() =
         doc.Dispose()
@@ -263,4 +257,6 @@
     // close the document
     doc.Close()
 
-    doc.MemStream.ToArray()
+    let bytes = Array.copy <| doc.MemStream.ToArray()
+
+    bytes
