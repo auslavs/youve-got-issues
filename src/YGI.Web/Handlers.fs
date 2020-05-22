@@ -256,26 +256,28 @@
         return! response
        }
 
-  let getSheet : HttpHandler =
+  let exportProject projNum : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
       task {
+        let updateStatus (s:ProjectStateDto) = { s with StatusTypes = Status.statusOptions |> List.toArray }
+        let logger = Logging.log <| ctx.GetLogger()
+        let! opt = Storage.getProject logger projNum ()
+        let dto = 
+          match opt with
+          | Some dto -> updateStatus dto
+          | None -> 
+            failwith "Failed to export project"
 
-        let stream,bytes = ExcelExport.Export ()
-        //let res = Encoding.UTF8.GetString(stream.GetBuffer(), 0 , (int)stream.Length)
-
+        let bytes = ExcelExport.Export2 dto ()
         let contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
         let headers = 
           dict [
             "Content-Disposition", StringValues("attachment");
-            "filename",  StringValues("excel_file.xlsx") ]
+            "filename",  StringValues(projNum + ".xlsx") ]
 
         ctx.Response.ContentType <- contentType
         headers |> Seq.iter ctx.Response.Headers.Add
         ctx.Response.ContentLength <- bytes.Length |> int64 |> Nullable
 
-        //let x = text res
-
-        //return! (Successful.ok x) next ctx
         return! ctx.WriteBytesAsync (bytes)
       }

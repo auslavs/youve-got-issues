@@ -104,6 +104,9 @@
               <span>Status</span>
               <select id="status-picker" @change="onPickerChange('status',$event)" class="selectpicker" v-model="statusFilter" multiple></select>
             </li>
+            <li class="list-group-item">
+              <a v-bind:href="'/api' + this.path +'/export'">Export</a>
+            </li>
           </ul>
 
         </div>
