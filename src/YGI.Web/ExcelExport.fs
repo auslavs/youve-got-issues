@@ -5,6 +5,7 @@
   open System.IO
   open System
   open YGI.Dto
+  open YGI.Logging
 
   let private ``0u`` = UInt32Value(0u)
   let private ``1u`` = UInt32Value(1u)
@@ -155,7 +156,9 @@
 
     columns
 
-  type ExportSheet (projNo:string) =
+  type ExportSheet (logger:Logger,projNo:string) =
+
+    do logger Info <| sprintf "Exporting Project: %s" projNo
 
     // Create the spreadsheet and the stream we will write it to
     let stream = new MemoryStream()
@@ -177,10 +180,14 @@
     do  sheet.SheetId <- UInt32Value.FromUInt32(doc.WorkbookPart.Workbook.Sheets.ChildElements.Count + 1 |> uint32)
     do  sheet.Name <- projNo |> StringValue
 
+    do logger Info "Before Style Sheet"
+
     // Add Stylesheet
     let workbookStylesPart : WorkbookStylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
     do GenerateWorkbookStylesPartContent &workbookStylesPart
     do workbookStylesPart.Stylesheet.Save()
+
+    do logger Info "After Style Sheet"
 
     // Add Columns
     let _ = worksheetPart.Worksheet.InsertAt(DefaultColumns :> OpenXmlElement, 0)
@@ -244,8 +251,9 @@
         doc.Dispose()
         stream.Dispose()
 
-  let Export2 (proj:ProjectStateDto) () =
-    use doc = new ExportSheet(proj.ProjectNumber)
+  let Export logger (proj:ProjectStateDto) () =
+
+    use doc = new ExportSheet(logger,proj.ProjectNumber)
 
     proj.Issues |> Array.iter doc.AddIssue
 

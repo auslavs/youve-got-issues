@@ -268,7 +268,7 @@
           | None -> 
             failwith "Failed to export project"
 
-        let bytes = ExcelExport.Export2 dto ()
+        let bytes = ExcelExport.Export logger dto ()
         let contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         let headers = 
           dict [
