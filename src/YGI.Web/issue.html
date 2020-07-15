@@ -192,12 +192,10 @@
 
             <div class="form-group">
               <label for="area">Area</label>
-              <input id="area" name="Area" v-model="issueUpdate.area" class="form-control" list="area-lst" type="text"
-                required>
+              <input list="area-lst" id="area" name="Area" v-model="issueUpdate.area" class="form-control" type="text"
+                required />
               <datalist id="area-lst">
-                <option v-for="area in areaList">
-                  {{ area }}
-                </option>
+                <option v-for="area in areaList">{{area}}</option>
               </datalist>
             </div>
 
@@ -206,9 +204,7 @@
               <input id="equipment" name="Equipment" v-model="issueUpdate.equipment" class="form-control"
                 list="equipment-lst" type="text" required />
               <datalist id="equipment-lst">
-                <option v-for="equipment in equipmentTypes">
-                  {{ equipment }}
-                </option>
+                <option v-for="equipment in equipmentTypes">{{equipment}}</option>
               </datalist>
             </div>
 
