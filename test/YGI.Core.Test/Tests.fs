@@ -1,4 +1,4 @@
-module IssueUpdates
+module Issues
 
 open System
 open Xunit
@@ -8,7 +8,7 @@ open TestHelpers
 
 
 /// Base issue test data we will use to test our updates
-let guid        = Guid.NewGuid();
+let guid        = Guid.NewGuid()
 let area        = String50.create "Area" "Area" |> unpackResult
 let equipment   = String50.create "Equipment" "Equipment" |> unpackResult
 let issueType   = String50.create "IssueType" "IssueType" |> unpackResult
@@ -79,3 +79,27 @@ let ``Update Area`` () =
   Assert.Equal(issue.Raised, updatedIssue.Raised)
   Assert.Equal(issue.RaisedBy, updatedIssue.RaisedBy)
   Assert.Equal(issue.DateClosed, updatedIssue.DateClosed)
+
+
+[<Fact>]
+let ``Update with incorrect Virtual Id`` () =
+
+  let areaUpdated = String50.create "Area Update" "Update" |> unpackResult
+
+  let update : IssueUpdate =
+    {
+      ItemNo      = 1
+      Title       = title
+      Description = description
+      Area        = areaUpdated
+      Equipment   = equipment
+      IssueType   = issueType
+      Status      = Status.Unopened
+      Vid         = Guid.NewGuid()
+    }
+
+  let result = Issue.update issue update
+
+  match result with
+  | Ok _ -> failwith "Issue should not have been updated"
+  | Error err -> Assert.True(err.StartsWith("Failed to update Issue:"))
