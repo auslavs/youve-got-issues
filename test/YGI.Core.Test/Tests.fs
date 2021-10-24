@@ -103,3 +103,26 @@ let ``Update with incorrect Virtual Id`` () =
   match result with
   | Ok _ -> failwith "Issue should not have been updated"
   | Error err -> Assert.True(err.StartsWith("Failed to update Issue:"))
+
+[<Fact>]
+let ``Update with incorrect ItemNo`` () =
+
+  let areaUpdated = String50.create "Area Update" "Update" |> unpackResult
+
+  let update : IssueUpdate =
+    {
+      ItemNo      = 2
+      Title       = title
+      Description = description
+      Area        = areaUpdated
+      Equipment   = equipment
+      IssueType   = issueType
+      Status      = Status.Unopened
+      Vid         = guid
+    }
+
+  let result = Issue.update issue update
+
+  match result with
+  | Ok _ -> failwith "Issue should not have been updated"
+  | Error err -> Assert.True(err.StartsWith("Failed to update Issue:"))
