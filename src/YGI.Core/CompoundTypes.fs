@@ -239,7 +239,7 @@
     /// </summary>
     /// <param name="state">Existing state that the issue is to be added to</param>
     /// <param name="issue">Issue to be added to the state</param>
-    /// <returns>A new state with the new issue added to teh issues list/returns>
+    /// <returns>A new state with the new issue added to teh issues list </returns>
     let addIssue (state:ProjectState) (issue:UnvalidatedNewIssue) = 
 
       /// Create a new issue and append it to the issues list
