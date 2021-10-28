@@ -12,24 +12,45 @@
   type LeaseCurrentState<'TState> = Logger -> string -> unit -> Task<'TState * string>
   type ApplyEvent<'TState,'TEvent> = 'TState -> 'TEvent -> Result<'TState,string>
   
+  type LogNewIssueEvent     = LogEvent<NewIssueDto>
+  type LogIssueUpdateEvent  = LogEvent<IssueUpdateDto>
+  type UpdateIssue          = ApplyEvent<ProjectState,IssueUpdateDto>
 
-  type LogNewProjectEvent = LogEvent<NewProjectDto>
-  type StoreProjectState = StoreState<ProjectState>
-  type UpdateProjectState = UpdateState<ProjectState>
-  type CreateNewProject = NewProjectDto -> Result<ProjectState, string>
+  type LeaseProjectState    = LeaseCurrentState<ProjectStateDto>
+  type AddIssueToProject    = ApplyEvent<ProjectState,NewIssueDto>
+  
+  type LogNewProjectEvent   = LogEvent<NewProjectDto>
+  type StoreProjectState    = StoreState<ProjectState>
+  type UpdateProjectState   = UpdateState<ProjectState>
+  type CreateNewProject     = NewProjectDto -> Result<ProjectState, string>
+  type CreateNewIssue       = Logger -> string -> LogNewIssueEvent -> NewProjectDto -> Result<ProjectState, string>
   type UpdateProjectSummary = Logger -> ProjectState -> TaskResult<unit, string>
-  type AddNewProject = YgiEvent<NewProjectDto> -> TaskResult<ProjectState,string>
+  
+  // Workflow Types
+  type AddNewProject = 
+        CreateNewProject 
+          -> StoreProjectState
+          -> UpdateProjectSummary
+          -> YgiEvent<NewProjectDto> 
+          -> TaskResult<ProjectState,string>
 
+  type AddNewIssuetoProject = 
+        LeaseProjectState 
+          -> AddIssueToProject
+          -> UpdateProjectState
+          -> UpdateProjectSummary
+          -> string         // Project Number
+          -> YgiEvent<NewIssueDto> 
+          -> TaskResult<ProjectState,string>
+
+  // Workflow Implementations
 
   let addNewProjectWorkflow
     (logger : Logger)
     (logEvent:LogNewProjectEvent)
-    (createNewProject : CreateNewProject)
-    (storeNewProject : StoreProjectState)
-    (updateProjectSummary : UpdateProjectSummary)
     : AddNewProject =
 
-    fun event -> 
+    fun createNewProject storeNewProject updateProjectSummary event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -42,22 +63,12 @@
         return newProject
       }
 
-
-  type LogNewIssueEvent = LogEvent<NewIssueDto>
-  type LeaseProjectState = LeaseCurrentState<ProjectStateDto>
-  type AddIssueToProject = ApplyEvent<ProjectState,NewIssueDto>
-
-
-  let addNewProjectIssueWorkflow
+  let addNewIssuetoProjectWorkflow
     (logger : Logger)
     (logEvent:LogNewIssueEvent)
-    (leaseProjectState:LeaseProjectState)
-    (addIssueToProject: AddIssueToProject)
-    (updateProjectState:UpdateProjectState)
-    (updateProjectSummary: UpdateProjectSummary)
-    =
+    : AddNewIssuetoProject =
 
-    fun projNum event -> 
+    fun leaseProjectState addIssueToProject updateProjectState updateProjectSummary projNum event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -71,9 +82,6 @@
 
         return newState
       }
-
-  type LogIssueUpdateEvent = LogEvent<IssueUpdateDto>
-  type UpdateIssue = ApplyEvent<ProjectState,IssueUpdateDto>
 
   let updateIssueWorkflow
     (logger : Logger)
