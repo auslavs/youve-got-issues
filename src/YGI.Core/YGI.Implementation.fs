@@ -3,7 +3,6 @@
   open YGI.Common
   open YGI.Dto
   open YGI.Logging
-  open System.Threading.Tasks
   open YGI.InternalTypes
 
   // Workflow Types
