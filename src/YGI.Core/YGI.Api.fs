@@ -5,6 +5,7 @@
   open YGI.Logging
   open YGI.Common
   open YGI.Dto
+  open YGI.InternalTypes
   open YGI.Implementation
   open YGI.Storage
   open YGI.Events
@@ -57,7 +58,7 @@
       evt.State
 
   let CreateNewProject =
-    fun (logger:Logger) evt ->
+    fun logger evt ->
 
         let workflow = 
             Implementation.addNewProjectWorkflow
@@ -70,10 +71,10 @@
         workflow evt
 
   let CreateNewIssue =
-    fun (logger:Logger) projNum evt ->
+    fun logger projNum evt ->
 
         let workflow = 
-            Implementation.addNewProjectIssueWorkflow
+            Implementation.addNewIssuetoProjectWorkflow
               logger
               logNewIssueEvent
               leaseProject

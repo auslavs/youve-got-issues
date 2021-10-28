@@ -8,56 +8,40 @@
   // Workflow Types
    
   type AddNewProjectWflow = 
-    CreateNewProject 
-      -> StoreProjectState
-      -> UpdateProjectSummary
-      -> YgiEvent<NewProjectDto> 
+    YgiEvent<NewProjectDto> 
       -> TaskResult<ProjectState,string>
 
   type AddNewIssuetoProjectWflow = 
-    LeaseProjectState 
-      -> AddIssueToProject
-      -> UpdateProjectState
-      -> UpdateProjectSummary
-      -> string         // Project Number
+    string         // Project Number
       -> YgiEvent<NewIssueDto> 
       -> TaskResult<ProjectState,string>
 
   type UpdateIssueWflow =
     string         // Project Number
-      -> LeaseProjectState
-      -> UpdateIssue
-      -> UpdateProjectState
-      -> UpdateProjectSummary
       -> YgiEvent<IssueUpdateDto>
       -> TaskResult<ProjectState,string>
 
   type AddCommentWflow =
     string         // Project Number
-      -> LeaseProjectState
-      -> AddNewComment
-      -> UpdateProjectState
-      -> UpdateProjectSummary
       -> YgiEvent<NewCommentDto>
       -> TaskResult<ProjectState,string>
 
   type AddAttchmentWflow =
     string         // Project Number
-      -> LeaseProjectState
-      -> AddAttachement
-      -> UpdateProjectState
-      -> UpdateProjectSummary
       -> YgiEvent<AttachmentDetailsDto array>
       -> TaskResult<ProjectState,string>
 
   // Workflow Implementation
 
   let addNewProjectWorkflow
-    (logger : Logger)
+    (logger:Logger)
     (logEvent:LogNewProjectEvent)
+    (createNewProject:CreateNewProject)
+    (storeNewProject:StoreProjectState)
+    (updateProjectSummary:UpdateProjectSummary)
     : AddNewProjectWflow =
 
-    fun createNewProject storeNewProject updateProjectSummary event -> 
+    fun event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -73,9 +57,13 @@
   let addNewIssuetoProjectWorkflow
     (logger : Logger)
     (logEvent:LogNewIssueEvent)
+    (leaseProjectState:LeaseProjectState )
+    (addIssueToProject:AddIssueToProject)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary:UpdateProjectSummary)
     : AddNewIssuetoProjectWflow =
 
-    fun leaseProjectState addIssueToProject updateProjectState updateProjectSummary projNum event -> 
+    fun projNum event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -93,9 +81,13 @@
   let updateIssueWorkflow
     (logger : Logger)
     (logEvent:LogIssueUpdateEvent)
+    (leaseProjectState:LeaseProjectState)
+    (updateIssue:UpdateIssue)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary:UpdateProjectSummary)
     : UpdateIssueWflow =
 
-    fun projNum leaseProjectState updateIssue updateProjectState updateProjectSummary event -> 
+    fun projNum event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -114,9 +106,13 @@
   let addCommentWorkflow
     (logger : Logger)
     (logEvent:LogAddNewCommentEvent)
+    (leaseProjectState:LeaseProjectState)
+    (addComment:AddNewComment)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary:UpdateProjectSummary)
     : AddCommentWflow =
 
-    fun projNum leaseProjectState addComment updateProjectState updateProjectSummary event -> 
+    fun projNum  event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -167,9 +163,13 @@
   let addAttchmentWorkflow
     (logger : Logger)
     (logEvent:LogAddAttachementEvent)
+    (leaseProjectState:LeaseProjectState)
+    (addAttachement:AddAttachement)
+    (updateProjectState:UpdateProjectState)
+    (updateProjectSummary:UpdateProjectSummary)
     : AddAttchmentWflow =
 
-    fun projNum leaseProjectState addAttachement updateProjectState updateProjectSummary event -> 
+    fun projNum event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
