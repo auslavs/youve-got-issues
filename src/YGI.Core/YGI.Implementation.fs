@@ -3,31 +3,43 @@
   open YGI.Common
   open YGI.Dto
   open YGI.Logging
-  open System.Threading.Tasks
+  open YGI.InternalTypes
 
-  type LogEvent<'TEvent> = Logger -> YgiEvent<'TEvent> -> unit -> 'TEvent
-  type StoreState<'TState> = Logger -> 'TState -> Task<unit>
-  type GetState<'TState> = Logger -> string -> Task<'TState>
-  type UpdateState<'TState> = Logger -> 'TState -> string -> Task<unit>
-  type LeaseCurrentState<'TState> = Logger -> string -> unit -> Task<'TState * string>
-  type ApplyEvent<'TState,'TEvent> = 'TState -> 'TEvent -> Result<'TState,string>
-  
+  // Workflow Types
+   
+  type AddNewProjectWflow = 
+    YgiEvent<NewProjectDto> 
+      -> TaskResult<ProjectState,string>
 
-  type LogNewProjectEvent = LogEvent<NewProjectDto>
-  type StoreProjectState = StoreState<ProjectState>
-  type UpdateProjectState = UpdateState<ProjectState>
-  type CreateNewProject = NewProjectDto -> Result<ProjectState, string>
-  type UpdateProjectSummary = Logger -> ProjectState -> TaskResult<unit, string>
-  type AddNewProject = YgiEvent<NewProjectDto> -> TaskResult<ProjectState,string>
+  type AddNewIssuetoProjectWflow = 
+    string         // Project Number
+      -> YgiEvent<NewIssueDto> 
+      -> TaskResult<ProjectState,string>
 
+  type UpdateIssueWflow =
+    string         // Project Number
+      -> YgiEvent<IssueUpdateDto>
+      -> TaskResult<ProjectState,string>
+
+  type AddCommentWflow =
+    string         // Project Number
+      -> YgiEvent<NewCommentDto>
+      -> TaskResult<ProjectState,string>
+
+  type AddAttchmentWflow =
+    string         // Project Number
+      -> YgiEvent<AttachmentDetailsDto array>
+      -> TaskResult<ProjectState,string>
+
+  // Workflow Implementation
 
   let addNewProjectWorkflow
-    (logger : Logger)
+    (logger:Logger)
     (logEvent:LogNewProjectEvent)
-    (createNewProject : CreateNewProject)
-    (storeNewProject : StoreProjectState)
-    (updateProjectSummary : UpdateProjectSummary)
-    : AddNewProject =
+    (createNewProject:CreateNewProject)
+    (storeNewProject:StoreProjectState)
+    (updateProjectSummary:UpdateProjectSummary)
+    : AddNewProjectWflow =
 
     fun event -> 
       taskResult {
@@ -42,20 +54,14 @@
         return newProject
       }
 
-
-  type LogNewIssueEvent = LogEvent<NewIssueDto>
-  type LeaseProjectState = LeaseCurrentState<ProjectStateDto>
-  type AddIssueToProject = ApplyEvent<ProjectState,NewIssueDto>
-
-
-  let addNewProjectIssueWorkflow
+  let addNewIssuetoProjectWorkflow
     (logger : Logger)
     (logEvent:LogNewIssueEvent)
-    (leaseProjectState:LeaseProjectState)
-    (addIssueToProject: AddIssueToProject)
+    (leaseProjectState:LeaseProjectState )
+    (addIssueToProject:AddIssueToProject)
     (updateProjectState:UpdateProjectState)
-    (updateProjectSummary: UpdateProjectSummary)
-    =
+    (updateProjectSummary:UpdateProjectSummary)
+    : AddNewIssuetoProjectWflow =
 
     fun projNum event -> 
       taskResult {
@@ -72,17 +78,14 @@
         return newState
       }
 
-  type LogIssueUpdateEvent = LogEvent<IssueUpdateDto>
-  type UpdateIssue = ApplyEvent<ProjectState,IssueUpdateDto>
-
   let updateIssueWorkflow
     (logger : Logger)
     (logEvent:LogIssueUpdateEvent)
     (leaseProjectState:LeaseProjectState)
-    (updateIssue: UpdateIssue)
+    (updateIssue:UpdateIssue)
     (updateProjectState:UpdateProjectState)
-    (updateProjectSummary: UpdateProjectSummary)
-    =
+    (updateProjectSummary:UpdateProjectSummary)
+    : UpdateIssueWflow =
 
     fun projNum event -> 
       taskResult {
@@ -99,19 +102,17 @@
         return newState
       }
 
-  type LogAddNewCommentEvent = LogEvent<NewCommentDto>
-  type AddNewComment = ApplyEvent<ProjectState,NewCommentDto>
-
+  
   let addCommentWorkflow
     (logger : Logger)
     (logEvent:LogAddNewCommentEvent)
     (leaseProjectState:LeaseProjectState)
-    (addComment: AddNewComment)
+    (addComment:AddNewComment)
     (updateProjectState:UpdateProjectState)
-    (updateProjectSummary: UpdateProjectSummary)
-    =
+    (updateProjectSummary:UpdateProjectSummary)
+    : AddCommentWflow =
 
-    fun projNum event -> 
+    fun projNum  event -> 
       taskResult {
 
         logger Info <| sprintf "Recieved Event:\r\n%A" event
@@ -158,17 +159,15 @@
         return! result |> TaskResult.ofResult
       }
 
-  type LogAddAttachementEvent = LogEvent<AttachmentDetailsDto []>
-  type AddAttachement = ApplyEvent<ProjectState,AttachmentDetailsDto []>
-
+  
   let addAttchmentWorkflow
     (logger : Logger)
     (logEvent:LogAddAttachementEvent)
     (leaseProjectState:LeaseProjectState)
-    (addAttachement: AddAttachement)
+    (addAttachement:AddAttachement)
     (updateProjectState:UpdateProjectState)
-    (updateProjectSummary: UpdateProjectSummary)
-    =
+    (updateProjectSummary:UpdateProjectSummary)
+    : AddAttchmentWflow =
 
     fun projNum event -> 
       taskResult {
